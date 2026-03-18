@@ -39,12 +39,12 @@ class FormStateGeneratorTest {
 
     @Test
     fun `holder has correct class name`() {
-        assertTrue(generate(stringField("email")).contains("class LoginFormHolder"))
+        assertTrue(generate(stringField("email")).contains("class LoginFormController"))
     }
 
     @Test
-    fun `holder implements FormStateHolder`() {
-        assertTrue(generate(stringField("email")).contains("FormStateHolder<LoginForm>"))
+    fun `holder implements FormController`() {
+        assertTrue(generate(stringField("email")).contains("FormController<LoginForm>"))
     }
 
     @Test
