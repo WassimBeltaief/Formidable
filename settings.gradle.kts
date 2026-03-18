@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 rootProject.name = "formforge"
 
 include(":formforge-core")
+include(":formforge-ksp")
