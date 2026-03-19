@@ -4,7 +4,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.Modifier
 
-public class FieldScope(
+public class FieldScope internal constructor(
     public val value: String,
     public val onValueChange: (String) -> Unit,
     public val onFocusLost: () -> Unit,
