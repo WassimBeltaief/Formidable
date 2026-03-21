@@ -11,7 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.text.input.ImeAction
 import com.wassimbeltaief.formforge.core.state.FieldState
 
@@ -48,7 +48,7 @@ public class FormScope internal constructor() {
             errorMessage = state.errorMessage,
             modifier = Modifier
                 .focusRequester(requester)
-                .onFocusChanged {
+                .onFocusEvent {
                     if (it.isFocused) wasFocused = true
                     else if (wasFocused) onFocusLost()
                 },
