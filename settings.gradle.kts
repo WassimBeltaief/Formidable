@@ -20,3 +20,4 @@ rootProject.name = "formforge"
 include(":formforge-core")
 include(":formforge-ksp")
 include(":formforge-compose")
+include(":formforge-sample-android")
