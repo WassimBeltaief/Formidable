@@ -3,6 +3,7 @@ package com.wassimbeltaief.formforge.ksp.parser
 /** Supported field types for the current implementation slice. */
 internal enum class FieldType {
     STRING,
+    BOOLEAN,
 }
 
 /** A validator rule captured from an annotation on a property. */
@@ -10,6 +11,7 @@ internal sealed class ValidatorRule {
     data class NotBlank(val message: String) : ValidatorRule()
     data class MinLength(val min: Int, val message: String) : ValidatorRule()
     data class Async(val validatorFqn: String) : ValidatorRule()
+    data class MustBeTrue(val message: String) : ValidatorRule()
 }
 
 /** Model for a single field in a @FormSchema class. */

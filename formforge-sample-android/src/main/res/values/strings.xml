@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">FormForge Sample</string>
+
+    <!-- SignUp screen -->
+    <string name="signup_title">Create account</string>
+    <string name="signup_subtitle">Fill in the details below to get started.</string>
+    <string name="signup_submit">Create account</string>
+
+    <!-- Success screen -->
+    <string name="signup_success_title">Welcome,\n%1$s.</string>
+    <string name="signup_success_body">Your account has been created.</string>
 </resources>

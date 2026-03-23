@@ -9,11 +9,13 @@ import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.BOOLEAN
 import com.squareup.kotlinpoet.STRING
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.buildCodeBlock
 import com.wassimbeltaief.formforge.ksp.parser.FieldModel
+import com.wassimbeltaief.formforge.ksp.parser.FieldType
 import com.wassimbeltaief.formforge.ksp.parser.SchemaModel
 import com.wassimbeltaief.formforge.ksp.parser.ValidatorRule
 
@@ -25,6 +27,7 @@ private val formControllerClass = ClassName("com.wassimbeltaief.formforge.core",
 // built-in validators
 private val notBlankValidatorClass = ClassName("com.wassimbeltaief.formforge.core.validation.builtin", "NotBlankValidator")
 private val minLengthValidatorClass = ClassName("com.wassimbeltaief.formforge.core.validation.builtin", "MinLengthValidator")
+private val mustBeTrueValidatorClass = ClassName("com.wassimbeltaief.formforge.core.validation.builtin", "MustBeTrueValidator")
 private val validationResultClass = ClassName("com.wassimbeltaief.formforge.core.state", "ValidationResult")
 
 // coroutines
@@ -51,14 +54,16 @@ internal class FormStateGenerator {
     // Form-level: status StateFlow, data property, validateAllSync, reset, clear, setFieldError
     // -------------------------------------------------------------------------
 
+    private fun fieldStateType(field: FieldModel) = when (field.type) {
+        FieldType.STRING -> fieldStateClass.parameterizedBy(STRING)
+        FieldType.BOOLEAN -> fieldStateClass.parameterizedBy(BOOLEAN)
+    }
+
     private fun buildHolderClass(
         schema: SchemaModel,
         schemaClass: ClassName,
         holderClass: ClassName,
     ): TypeSpec {
-        val fieldStateString = fieldStateClass.parameterizedBy(STRING)
-        val mutableFieldFlow = mutableStateFlowClass.parameterizedBy(fieldStateString)
-        val publicFieldFlow = stateFlowClass.parameterizedBy(fieldStateString)
         val mutableStatusFlow = mutableStateFlowClass.parameterizedBy(formStatusClass)
         val publicStatusFlow = stateFlowClass.parameterizedBy(formStatusClass)
 
@@ -73,8 +78,11 @@ internal class FormStateGenerator {
             // One private MutableStateFlow + one public StateFlow per field
             .apply {
                 for (field in schema.fields) {
+                    val stateType = fieldStateType(field)
+                    val mutableFlowType = mutableStateFlowClass.parameterizedBy(stateType)
+                    val publicFlowType = stateFlowClass.parameterizedBy(stateType)
                     addProperty(
-                        PropertySpec.builder("_${field.name}", mutableFieldFlow, KModifier.PRIVATE)
+                        PropertySpec.builder("_${field.name}", mutableFlowType, KModifier.PRIVATE)
                             .initializer(
                                 "%T(%T(value = initial.%N, initialValue = initial.%N, label = %S, hint = %S))",
                                 mutableStateFlowClass, fieldStateClass,
@@ -83,7 +91,7 @@ internal class FormStateGenerator {
                             .build()
                     )
                     addProperty(
-                        PropertySpec.builder(field.name, publicFieldFlow)
+                        PropertySpec.builder(field.name, publicFlowType)
                             .initializer("_%N.%M()", field.name, asStateFlowFn)
                             .build()
                     )
@@ -147,11 +155,11 @@ internal class FormStateGenerator {
 
     private fun buildUpdateFn(field: FieldModel): FunSpec {
         val syncValidators = field.validators.filterNot { it is ValidatorRule.Async }
+        val paramType = if (field.type == FieldType.BOOLEAN) BOOLEAN else STRING
         return FunSpec.builder("update${field.name.capitalize()}")
-            .addParameter("value", STRING)
+            .addParameter("value", paramType)
             .addCode(buildCodeBlock {
                 beginControlFlow("_%N.%M { s ->", field.name, updateFn)
-                // Always clear errors on value change — stale server errors must not persist.
                 if (syncValidators.isEmpty()) {
                     addStatement("s.copy(value = value, isDirty = value != s.initialValue, errors = emptyList())")
                 } else {
@@ -228,7 +236,10 @@ internal class FormStateGenerator {
             .addCode(buildCodeBlock {
                 for (field in schema.fields) {
                     beginControlFlow("_%N.%M { s ->", field.name, updateFn)
-                    addStatement("""s.copy(value = "", isDirty = "" != s.initialValue, errors = emptyList())""")
+                    when (field.type) {
+                        FieldType.STRING -> addStatement("""s.copy(value = "", isDirty = "" != s.initialValue, errors = emptyList())""")
+                        FieldType.BOOLEAN -> addStatement("s.copy(value = false, isDirty = false != s.initialValue, errors = emptyList())")
+                    }
                     endControlFlow()
                 }
             })
@@ -274,6 +285,7 @@ internal class FormStateGenerator {
         when (rule) {
             is ValidatorRule.NotBlank -> add("%T(%S)", notBlankValidatorClass, rule.message)
             is ValidatorRule.MinLength -> add("%T(%L, %S)", minLengthValidatorClass, rule.min, rule.message)
+            is ValidatorRule.MustBeTrue -> add("%T(%S)", mustBeTrueValidatorClass, rule.message)
             is ValidatorRule.Async -> error("Async validators are not inlined — handled by the Compose layer")
         }
     }

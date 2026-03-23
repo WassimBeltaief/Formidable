@@ -20,11 +20,29 @@ public class FormScope internal constructor() {
     internal val focusRequesters = LinkedHashMap<Any, FocusRequester>()
 
     @Composable
-    public fun Field(
+    public fun BooleanField(
+        state: FieldState<Boolean>,
+        onCheckedChange: (Boolean) -> Unit,
+        onFocusLost: () -> Unit,
+        content: @Composable BooleanFieldScope.() -> Unit,
+    ) {
+        BooleanFieldScope(
+            checked = state.value,
+            onCheckedChange = onCheckedChange,
+            label = state.label,
+            hint = state.hint,
+            showError = state.showError,
+            errorMessage = state.errorMessage,
+            modifier = Modifier,
+        ).content()
+    }
+
+    @Composable
+    public fun StringField(
         state: FieldState<String>,
         onValueChange: (String) -> Unit,
         onFocusLost: () -> Unit,
-        content: @Composable FieldScope.() -> Unit,
+        content: @Composable StringFieldScope.() -> Unit,
     ) {
         val key = remember { Any() }
         val requester = remember { FocusRequester() }
@@ -38,7 +56,7 @@ public class FormScope internal constructor() {
             imeAction = if (index == values.size - 1) ImeAction.Done else ImeAction.Next
         }
 
-        FieldScope(
+        StringFieldScope(
             value = state.value,
             onValueChange = onValueChange,
             onFocusLost = onFocusLost,

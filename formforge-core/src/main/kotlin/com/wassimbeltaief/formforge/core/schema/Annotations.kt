@@ -30,5 +30,11 @@ public annotation class MinLength(
 
 @Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.SOURCE)
+public annotation class MustBeTrue(
+    val message: String = "",
+)
+
+@Target(AnnotationTarget.PROPERTY)
+@Retention(AnnotationRetention.SOURCE)
 public annotation class AsyncValidation(val validator: KClass<out AsyncFieldValidator<*>>)
 

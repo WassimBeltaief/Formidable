@@ -57,7 +57,7 @@ class FormForgeTest {
     fun fieldScopeContent_isRendered() {
         rule.setContent {
             FormForge {
-                Field(
+                StringField(
                     state = fieldState(value = "hello"),
                     onValueChange = {},
                     onFocusLost = {},
@@ -81,7 +81,7 @@ class FormForgeTest {
         var capturedImeAction: ImeAction? = null
         rule.setContent {
             FormForge {
-                Field(
+                StringField(
                     state = fieldState(),
                     onValueChange = {},
                     onFocusLost = {},
@@ -108,7 +108,7 @@ class FormForgeTest {
         var field2Focused = false
         rule.setContent {
             FormForge {
-                Field(state = fieldState(), onValueChange = {}, onFocusLost = {}) {
+                StringField(state = fieldState(), onValueChange = {}, onFocusLost = {}) {
                     BasicTextField(
                         value = value,
                         onValueChange = onValueChange,
@@ -117,7 +117,7 @@ class FormForgeTest {
                         keyboardActions = keyboardActions,
                     )
                 }
-                Field(state = fieldState(), onValueChange = {}, onFocusLost = {}) {
+                StringField(state = fieldState(), onValueChange = {}, onFocusLost = {}) {
                     BasicTextField(
                         value = value,
                         onValueChange = onValueChange,
@@ -143,7 +143,7 @@ class FormForgeTest {
         var state by mutableStateOf(fieldState(value = ""))
         rule.setContent {
             FormForge {
-                Field(
+                StringField(
                     state = state,
                     onValueChange = { state = state.copy(value = it) },
                     onFocusLost = {},
@@ -171,7 +171,7 @@ class FormForgeTest {
         var capturedShowError: Boolean? = null
         rule.setContent {
             FormForge {
-                Field(
+                StringField(
                     state = fieldState(errors = listOf("Required"), isTouched = false),
                     onValueChange = {},
                     onFocusLost = {},
@@ -195,7 +195,7 @@ class FormForgeTest {
         var capturedErrorMessage: String? = null
         rule.setContent {
             FormForge {
-                Field(
+                StringField(
                     state = fieldState(errors = listOf("Required"), isTouched = true),
                     onValueChange = {},
                     onFocusLost = {},
@@ -223,7 +223,7 @@ class FormForgeTest {
         var capturedHint: String? = null
         rule.setContent {
             FormForge {
-                Field(
+                StringField(
                     state = fieldState(label = "Email", hint = "Enter your email"),
                     onValueChange = {},
                     onFocusLost = {},
@@ -250,7 +250,7 @@ class FormForgeTest {
         var focusLostCalled = false
         rule.setContent {
             FormForge {
-                Field(
+                StringField(
                     state = fieldState(),
                     onValueChange = {},
                     onFocusLost = { focusLostCalled = true },
@@ -277,7 +277,7 @@ class FormForgeTest {
             // Reading recompose triggers recomposition of FormForge when it changes
             if (recompose) Unit
             FormForge {
-                Field(state = fieldState(), onValueChange = {}, onFocusLost = {}) {
+                StringField(state = fieldState(), onValueChange = {}, onFocusLost = {}) {
                     BasicTextField(
                         value = value,
                         onValueChange = onValueChange,
@@ -286,7 +286,7 @@ class FormForgeTest {
                         keyboardActions = keyboardActions,
                     )
                 }
-                Field(state = fieldState(), onValueChange = {}, onFocusLost = {}) {
+                StringField(state = fieldState(), onValueChange = {}, onFocusLost = {}) {
                     BasicTextField(
                         value = value,
                         onValueChange = onValueChange,
@@ -316,7 +316,7 @@ class FormForgeTest {
         var state by mutableStateOf(fieldState(value = "initial"))
         rule.setContent {
             FormForge {
-                Field(
+                StringField(
                     state = state,
                     onValueChange = { state = state.copy(value = it) },
                     onFocusLost = {},

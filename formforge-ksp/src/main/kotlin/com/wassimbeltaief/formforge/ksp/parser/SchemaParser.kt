@@ -46,6 +46,7 @@ internal class SchemaParser(private val logger: KSPLogger) {
         val typeName = prop.type.resolve().declaration.qualifiedName?.asString()
         return when (typeName) {
             "kotlin.String" -> FieldType.STRING
+            "kotlin.Boolean" -> FieldType.BOOLEAN
             else -> null
         }
     }
@@ -54,22 +55,30 @@ internal class SchemaParser(private val logger: KSPLogger) {
         annotations: List<KSAnnotation>,
         type: FieldType,
     ): List<ValidatorRule> {
-        if (type != FieldType.STRING) return emptyList()
         val result = mutableListOf<ValidatorRule>()
 
-        annotations.findByFqn("$PKG.NotBlank")?.let {
-            result += ValidatorRule.NotBlank(it.getArg("message") ?: "Must not be blank")
-        }
-        annotations.findByFqn("$PKG.MinLength")?.let {
-            val min = it.getArg<Int>("min") ?: 0
-            result += ValidatorRule.MinLength(min, it.getArg("message") ?: "Must be at least $min characters")
-        }
-        annotations.findByFqn("$PKG.AsyncValidation")?.let { ann ->
-            val validatorType = ann.arguments
-                .firstOrNull { it.name?.asString() == "validator" }
-                ?.value as? KSType
-            validatorType?.declaration?.qualifiedName?.asString()?.let { fqn ->
-                result += ValidatorRule.Async(fqn)
+        when (type) {
+            FieldType.STRING -> {
+                annotations.findByFqn("$PKG.NotBlank")?.let {
+                    result += ValidatorRule.NotBlank(it.getArg("message") ?: "Must not be blank")
+                }
+                annotations.findByFqn("$PKG.MinLength")?.let {
+                    val min = it.getArg<Int>("min") ?: 0
+                    result += ValidatorRule.MinLength(min, it.getArg("message") ?: "Must be at least $min characters")
+                }
+                annotations.findByFqn("$PKG.AsyncValidation")?.let { ann ->
+                    val validatorType = ann.arguments
+                        .firstOrNull { it.name?.asString() == "validator" }
+                        ?.value as? KSType
+                    validatorType?.declaration?.qualifiedName?.asString()?.let { fqn ->
+                        result += ValidatorRule.Async(fqn)
+                    }
+                }
+            }
+            FieldType.BOOLEAN -> {
+                annotations.findByFqn("$PKG.MustBeTrue")?.let {
+                    result += ValidatorRule.MustBeTrue(it.getArg("message") ?: "Must be accepted")
+                }
             }
         }
 
