@@ -10,6 +10,7 @@ import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.BOOLEAN
+import com.squareup.kotlinpoet.INT
 import com.squareup.kotlinpoet.STRING
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asClassName
@@ -28,6 +29,7 @@ private val formControllerClass = ClassName("com.wassimbeltaief.formforge.core",
 private val notBlankValidatorClass = ClassName("com.wassimbeltaief.formforge.core.validation.builtin", "NotBlankValidator")
 private val minLengthValidatorClass = ClassName("com.wassimbeltaief.formforge.core.validation.builtin", "MinLengthValidator")
 private val mustBeTrueValidatorClass = ClassName("com.wassimbeltaief.formforge.core.validation.builtin", "MustBeTrueValidator")
+private val intRangeValidatorClass = ClassName("com.wassimbeltaief.formforge.core.validation.builtin", "IntRangeValidator")
 private val validationResultClass = ClassName("com.wassimbeltaief.formforge.core.state", "ValidationResult")
 
 // coroutines
@@ -57,6 +59,7 @@ internal class FormStateGenerator {
     private fun fieldStateType(field: FieldModel) = when (field.type) {
         FieldType.STRING -> fieldStateClass.parameterizedBy(STRING)
         FieldType.BOOLEAN -> fieldStateClass.parameterizedBy(BOOLEAN)
+        FieldType.INT -> fieldStateClass.parameterizedBy(INT)
     }
 
     private fun buildHolderClass(
@@ -155,7 +158,11 @@ internal class FormStateGenerator {
 
     private fun buildUpdateFn(field: FieldModel): FunSpec {
         val syncValidators = field.validators.filterNot { it is ValidatorRule.Async }
-        val paramType = if (field.type == FieldType.BOOLEAN) BOOLEAN else STRING
+        val paramType = when (field.type) {
+            FieldType.BOOLEAN -> BOOLEAN
+            FieldType.INT -> INT
+            else -> STRING
+        }
         return FunSpec.builder("update${field.name.capitalize()}")
             .addParameter("value", paramType)
             .addCode(buildCodeBlock {
@@ -239,6 +246,7 @@ internal class FormStateGenerator {
                     when (field.type) {
                         FieldType.STRING -> addStatement("""s.copy(value = "", isDirty = "" != s.initialValue, errors = emptyList())""")
                         FieldType.BOOLEAN -> addStatement("s.copy(value = false, isDirty = false != s.initialValue, errors = emptyList())")
+                        FieldType.INT -> addStatement("s.copy(value = 0, isDirty = 0 != s.initialValue, errors = emptyList())")
                     }
                     endControlFlow()
                 }
@@ -286,6 +294,21 @@ internal class FormStateGenerator {
             is ValidatorRule.NotBlank -> add("%T(%S)", notBlankValidatorClass, rule.message)
             is ValidatorRule.MinLength -> add("%T(%L, %S)", minLengthValidatorClass, rule.min, rule.message)
             is ValidatorRule.MustBeTrue -> add("%T(%S)", mustBeTrueValidatorClass, rule.message)
+            is ValidatorRule.IntRange -> {
+                val minArg = if (rule.min != null) "%L" else "null"
+                val maxArg = if (rule.max != null) "%L" else "null"
+                val minVal = rule.min ?: ""
+                val maxVal = rule.max ?: ""
+                if (rule.min != null && rule.max != null) {
+                    add("%T($minArg, $maxArg, %S)", intRangeValidatorClass, minVal, maxVal, rule.message)
+                } else if (rule.min != null) {
+                    add("%T($minArg, null, %S)", intRangeValidatorClass, minVal, rule.message)
+                } else if (rule.max != null) {
+                    add("%T(null, $maxArg, %S)", intRangeValidatorClass, maxVal, rule.message)
+                } else {
+                    add("%T(null, null, %S)", intRangeValidatorClass, rule.message)
+                }
+            }
             is ValidatorRule.Async -> error("Async validators are not inlined — handled by the Compose layer")
         }
     }

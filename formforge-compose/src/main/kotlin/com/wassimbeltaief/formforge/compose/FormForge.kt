@@ -13,6 +13,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import com.wassimbeltaief.formforge.core.state.FieldState
 
 public class FormScope internal constructor() {
@@ -34,6 +35,52 @@ public class FormScope internal constructor() {
             showError = state.showError,
             errorMessage = state.errorMessage,
             modifier = Modifier,
+        ).content()
+    }
+
+    @Composable
+    public fun IntField(
+        state: FieldState<Int>,
+        onValueChange: (Int) -> Unit,
+        onFocusLost: () -> Unit,
+        content: @Composable IntFieldScope.() -> Unit,
+    ) {
+        val key = remember { Any() }
+        val requester = remember { FocusRequester() }
+        var imeAction by remember { mutableStateOf(ImeAction.Done) }
+        var wasFocused by remember { mutableStateOf(false) }
+
+        SideEffect {
+            focusRequesters[key] = requester
+            val values = focusRequesters.values.toList()
+            val index = values.indexOf(requester)
+            imeAction = if (index == values.size - 1) ImeAction.Done else ImeAction.Next
+        }
+
+        IntFieldScope(
+            value = state.value,
+            onValueChange = onValueChange,
+            label = state.label,
+            hint = state.hint,
+            showError = state.showError,
+            errorMessage = state.errorMessage,
+            modifier = Modifier
+                .focusRequester(requester)
+                .onFocusEvent {
+                    if (it.isFocused) wasFocused = true
+                    else if (wasFocused) onFocusLost()
+                },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = imeAction,
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    val values = focusRequesters.values.toList()
+                    val index = values.indexOf(requester)
+                    values.getOrNull(index + 1)?.requestFocus()
+                },
+            ),
         ).content()
     }
 

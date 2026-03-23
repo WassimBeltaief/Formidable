@@ -31,6 +31,7 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
     val usernameState by viewModel.controller.username.collectAsState()
     val firstNameState by viewModel.controller.firstName.collectAsState()
     val lastNameState by viewModel.controller.lastName.collectAsState()
+    val ageState by viewModel.controller.age.collectAsState()
     val acceptTermsState by viewModel.controller.acceptTerms.collectAsState()
 
     if (submitted) {
@@ -125,6 +126,27 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
                     modifier = modifier.fillMaxWidth(),
                     label = { Text(label) },
                     placeholder = { Text(hint) },
+                    isError = showError,
+                    supportingText = if (showError) {
+                        { Text(errorMessage ?: "") }
+                    } else null,
+                    keyboardOptions = keyboardOptions,
+                    keyboardActions = keyboardActions,
+                    singleLine = true,
+                )
+            }
+            Spacer(Modifier.height(16.dp))
+            IntField(
+                state = ageState,
+                onValueChange = { viewModel.controller.updateAge(it) },
+                onFocusLost = { viewModel.controller.touchAge() },
+            ) {
+                OutlinedTextField(
+                    value = if (value == 0) "" else value.toString(),
+                    onValueChange = { onValueChange(it.filter { c -> c.isDigit() }.toIntOrNull() ?: 0) },
+                    modifier = modifier.fillMaxWidth(),
+                    label = { Text(label) },
+                    placeholder = { Text(stringResource(R.string.signup_age_hint)) },
                     isError = showError,
                     supportingText = if (showError) {
                         { Text(errorMessage ?: "") }

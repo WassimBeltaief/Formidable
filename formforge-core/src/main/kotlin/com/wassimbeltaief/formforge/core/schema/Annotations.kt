@@ -36,5 +36,13 @@ public annotation class MustBeTrue(
 
 @Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.SOURCE)
+public annotation class IntRange(
+    val min: Int = Int.MIN_VALUE,
+    val max: Int = Int.MAX_VALUE,
+    val message: String = "",
+)
+
+@Target(AnnotationTarget.PROPERTY)
+@Retention(AnnotationRetention.SOURCE)
 public annotation class AsyncValidation(val validator: KClass<out AsyncFieldValidator<*>>)
 

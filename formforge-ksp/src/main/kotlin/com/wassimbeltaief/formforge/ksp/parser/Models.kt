@@ -4,6 +4,7 @@ package com.wassimbeltaief.formforge.ksp.parser
 internal enum class FieldType {
     STRING,
     BOOLEAN,
+    INT,
 }
 
 /** A validator rule captured from an annotation on a property. */
@@ -12,6 +13,7 @@ internal sealed class ValidatorRule {
     data class MinLength(val min: Int, val message: String) : ValidatorRule()
     data class Async(val validatorFqn: String) : ValidatorRule()
     data class MustBeTrue(val message: String) : ValidatorRule()
+    data class IntRange(val min: Int?, val max: Int?, val message: String) : ValidatorRule()
 }
 
 /** Model for a single field in a @FormSchema class. */

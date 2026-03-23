@@ -3,6 +3,7 @@
     <string name="app_name">FormForge Sample</string>
 
     <!-- SignUp screen -->
+    <string name="signup_age_hint">e.g. 25</string>
     <string name="signup_title">Create account</string>
     <string name="signup_subtitle">Fill in the details below to get started.</string>
     <string name="signup_submit">Create account</string>

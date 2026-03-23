@@ -47,6 +47,7 @@ internal class SchemaParser(private val logger: KSPLogger) {
         return when (typeName) {
             "kotlin.String" -> FieldType.STRING
             "kotlin.Boolean" -> FieldType.BOOLEAN
+            "kotlin.Int" -> FieldType.INT
             else -> null
         }
     }
@@ -78,6 +79,13 @@ internal class SchemaParser(private val logger: KSPLogger) {
             FieldType.BOOLEAN -> {
                 annotations.findByFqn("$PKG.MustBeTrue")?.let {
                     result += ValidatorRule.MustBeTrue(it.getArg("message") ?: "Must be accepted")
+                }
+            }
+            FieldType.INT -> {
+                annotations.findByFqn("$PKG.IntRange")?.let {
+                    val min = it.getArg<Int>("min").takeIf { v -> v != Int.MIN_VALUE }
+                    val max = it.getArg<Int>("max").takeIf { v -> v != Int.MAX_VALUE }
+                    result += ValidatorRule.IntRange(min, max, it.getArg("message") ?: "Value out of range")
                 }
             }
         }
