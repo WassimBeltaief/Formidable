@@ -34,6 +34,8 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
     val ageState by viewModel.controller.age.collectAsState()
     val acceptTermsState by viewModel.controller.acceptTerms.collectAsState()
 
+    val isFormValid by viewModel.controller.isValid.collectAsState()
+
     if (submitted) {
         Column(
             modifier = Modifier
@@ -181,6 +183,7 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
         Spacer(Modifier.height(32.dp))
         Button(
             onClick = { viewModel.submitForm() },
+            enabled = isFormValid,
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(stringResource(R.string.signup_submit))

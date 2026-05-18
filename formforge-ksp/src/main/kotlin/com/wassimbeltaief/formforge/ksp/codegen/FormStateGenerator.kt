@@ -37,6 +37,11 @@ private val mutableStateFlowClass = ClassName("kotlinx.coroutines.flow", "Mutabl
 private val stateFlowClass = ClassName("kotlinx.coroutines.flow", "StateFlow")
 private val updateFn = MemberName("kotlinx.coroutines.flow", "update")
 private val asStateFlowFn = MemberName("kotlinx.coroutines.flow", "asStateFlow")
+private val combineFn = MemberName("kotlinx.coroutines.flow", "combine")
+private val stateInFn = MemberName("kotlinx.coroutines.flow", "stateIn")
+private val sharingStartedClass = ClassName("kotlinx.coroutines.flow", "SharingStarted")
+private val coroutineScopeClass = ClassName("kotlinx.coroutines", "CoroutineScope")
+private val dispatchersClass = ClassName("kotlinx.coroutines", "Dispatchers")
 
 internal class FormStateGenerator {
 
@@ -84,13 +89,28 @@ internal class FormStateGenerator {
                     val stateType = fieldStateType(field)
                     val mutableFlowType = mutableStateFlowClass.parameterizedBy(stateType)
                     val publicFlowType = stateFlowClass.parameterizedBy(stateType)
-                    addProperty(
-                        PropertySpec.builder("_${field.name}", mutableFlowType, KModifier.PRIVATE)
-                            .initializer(
+                    val syncValidators = field.validators.filterNot { it is ValidatorRule.Async }
+                    val initializer = if (syncValidators.isEmpty()) {
+                        buildCodeBlock {
+                            add(
                                 "%T(%T(value = initial.%N, initialValue = initial.%N, label = %S, hint = %S))",
                                 mutableStateFlowClass, fieldStateClass,
                                 field.name, field.name, field.label, field.hint,
                             )
+                        }
+                    } else {
+                        buildCodeBlock {
+                            add("%T(%T(value = initial.%N, initialValue = initial.%N, label = %S, hint = %S, errors = (",
+                                mutableStateFlowClass, fieldStateClass,
+                                field.name, field.name, field.label, field.hint,
+                            )
+                            add(runValidatorsExpr(syncValidators, "initial.${field.name}"))
+                            add(").errorsOrEmpty()))")
+                        }
+                    }
+                    addProperty(
+                        PropertySpec.builder("_${field.name}", mutableFlowType, KModifier.PRIVATE)
+                            .initializer(initializer)
                             .build()
                     )
                     addProperty(
@@ -111,6 +131,8 @@ internal class FormStateGenerator {
                     .initializer("_status.%M()", asStateFlowFn)
                     .build()
             )
+            // isValid derived flow
+            .addProperty(buildIsValidProperty(schema))
             // data property
             .addProperty(buildDataProperty(schema, schemaClass))
             // per-field functions
@@ -135,6 +157,22 @@ internal class FormStateGenerator {
                     .build()
             )
             .build()
+
+    private fun buildIsValidProperty(schema: SchemaModel): PropertySpec {
+        val isValidType = stateFlowClass.parameterizedBy(BOOLEAN)
+        val code = buildCodeBlock {
+            add("%M(", combineFn)
+            for ((index, field) in schema.fields.withIndex()) {
+                if (index > 0) add(", ")
+                add("_%N", field.name)
+            }
+            add(") { states -> states.all { it.isValid } }\n")
+            add("    .%M(%T(%T.Default), %T.Eagerly, false)", stateInFn, coroutineScopeClass, dispatchersClass, sharingStartedClass)
+        }
+        return PropertySpec.builder("isValid", isValidType, KModifier.OVERRIDE)
+            .initializer(code)
+            .build()
+    }
 
     private fun buildDataProperty(schema: SchemaModel, schemaClass: ClassName): PropertySpec {
         val getter = FunSpec.getterBuilder()
