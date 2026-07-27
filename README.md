@@ -1,4 +1,4 @@
-# FormForge
+# Formidable
 
 An Android library for building dynamic forms programmatically with ease.
 
@@ -20,7 +20,7 @@ Add the dependency to your `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'com.wassimbeltaief:formforge:1.0.0'
+    implementation 'com.wassimbeltaief:formidable:1.0.0'
 }
 ```
 

@@ -15,9 +15,9 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "formforge"
+rootProject.name = "formidable"
 
-include(":formforge-core")
-include(":formforge-ksp")
-include(":formforge-compose")
-include(":formforge-sample-android")
+include(":formidable-core")
+include(":formidable-ksp")
+include(":formidable-compose")
+include(":formidable-sample-android")
