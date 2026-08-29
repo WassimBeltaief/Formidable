@@ -30,6 +30,26 @@ public annotation class MinLength(
 
 @Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.SOURCE)
+public annotation class MaxLength(
+    val max: Int,
+    val message: String = "",
+)
+
+@Target(AnnotationTarget.PROPERTY)
+@Retention(AnnotationRetention.SOURCE)
+public annotation class Email(
+    val message: String = "",
+)
+
+@Target(AnnotationTarget.PROPERTY)
+@Retention(AnnotationRetention.SOURCE)
+public annotation class Pattern(
+    val regex: String,
+    val message: String = "",
+)
+
+@Target(AnnotationTarget.PROPERTY)
+@Retention(AnnotationRetention.SOURCE)
 public annotation class MustBeTrue(
     val message: String = "",
 )
