@@ -28,6 +28,9 @@ private val formControllerClass = ClassName("com.wassimbeltaief.formidable.core"
 // built-in validators
 private val notBlankValidatorClass = ClassName("com.wassimbeltaief.formidable.core.validation.builtin", "NotBlankValidator")
 private val minLengthValidatorClass = ClassName("com.wassimbeltaief.formidable.core.validation.builtin", "MinLengthValidator")
+private val maxLengthValidatorClass = ClassName("com.wassimbeltaief.formidable.core.validation.builtin", "MaxLengthValidator")
+private val emailValidatorClass = ClassName("com.wassimbeltaief.formidable.core.validation.builtin", "EmailValidator")
+private val patternValidatorClass = ClassName("com.wassimbeltaief.formidable.core.validation.builtin", "PatternValidator")
 private val mustBeTrueValidatorClass = ClassName("com.wassimbeltaief.formidable.core.validation.builtin", "MustBeTrueValidator")
 private val intRangeValidatorClass = ClassName("com.wassimbeltaief.formidable.core.validation.builtin", "IntRangeValidator")
 private val validationResultClass = ClassName("com.wassimbeltaief.formidable.core.state", "ValidationResult")
@@ -340,6 +343,9 @@ internal class FormStateGenerator {
         when (rule) {
             is ValidatorRule.NotBlank -> add("%T(%S)", notBlankValidatorClass, rule.message)
             is ValidatorRule.MinLength -> add("%T(%L, %S)", minLengthValidatorClass, rule.min, rule.message)
+            is ValidatorRule.MaxLength -> add("%T(%L, %S)", maxLengthValidatorClass, rule.max, rule.message)
+            is ValidatorRule.Email -> add("%T(%S)", emailValidatorClass, rule.message)
+            is ValidatorRule.Pattern -> add("%T(%S, %S)", patternValidatorClass, rule.regex, rule.message)
             is ValidatorRule.MustBeTrue -> add("%T(%S)", mustBeTrueValidatorClass, rule.message)
             is ValidatorRule.IntRange -> {
                 val minArg = if (rule.min != null) "%L" else "null"

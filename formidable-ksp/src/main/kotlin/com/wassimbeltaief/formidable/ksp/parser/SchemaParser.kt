@@ -72,6 +72,17 @@ internal class SchemaParser(private val logger: KSPLogger) {
                     val min = it.getArg<Int>("min") ?: 0
                     result += ValidatorRule.MinLength(min, it.getArg("message") ?: "Must be at least $min characters")
                 }
+                annotations.findByFqn("$PKG.MaxLength")?.let {
+                    val max = it.getArg<Int>("max") ?: Int.MAX_VALUE
+                    result += ValidatorRule.MaxLength(max, it.getArg("message") ?: "Must be at most $max characters")
+                }
+                annotations.findByFqn("$PKG.Email")?.let {
+                    result += ValidatorRule.Email(it.getArg("message") ?: "Invalid email address")
+                }
+                annotations.findByFqn("$PKG.Pattern")?.let {
+                    val regex = it.getArg<String>("regex") ?: ".*"
+                    result += ValidatorRule.Pattern(regex, it.getArg("message") ?: "Invalid format")
+                }
                 annotations.findByFqn("$PKG.AsyncValidation")?.let { ann ->
                     val validatorType = ann.arguments
                         .firstOrNull { it.name?.asString() == "validator" }

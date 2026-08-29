@@ -11,6 +11,9 @@ internal enum class FieldType {
 internal sealed class ValidatorRule {
     data class NotBlank(val message: String) : ValidatorRule()
     data class MinLength(val min: Int, val message: String) : ValidatorRule()
+    data class MaxLength(val max: Int, val message: String) : ValidatorRule()
+    data class Email(val message: String) : ValidatorRule()
+    data class Pattern(val regex: String, val message: String) : ValidatorRule()
     data class Async(val validatorFqn: String) : ValidatorRule()
     data class MustBeTrue(val message: String) : ValidatorRule()
     data class IntRange(val min: Int?, val max: Int?, val message: String) : ValidatorRule()
