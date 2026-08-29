@@ -109,6 +109,52 @@ public class FormScope internal constructor() {
             onFocusLost = onFocusLost,
             label = state.label,
             hint = state.hint,
+            isOptional = state.isOptional,
+            showError = state.showError,
+            errorMessage = state.errorMessage,
+            modifier = Modifier
+                .focusRequester(requester)
+                .onFocusEvent {
+                    if (it.isFocused) wasFocused = true
+                    else if (wasFocused) onFocusLost()
+                },
+            keyboardOptions = KeyboardOptions(imeAction = imeAction),
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    val values = focusRequesters.values.toList()
+                    val index = values.indexOf(requester)
+                    values.getOrNull(index + 1)?.requestFocus()
+                },
+            ),
+        ).content()
+    }
+
+    @Composable
+    public fun NullableStringField(
+        state: FieldState<String?>,
+        onValueChange: (String?) -> Unit,
+        onFocusLost: () -> Unit,
+        content: @Composable NullableStringFieldScope.() -> Unit,
+    ) {
+        val key = remember { Any() }
+        val requester = remember { FocusRequester() }
+        var imeAction by remember { mutableStateOf(ImeAction.Done) }
+        var wasFocused by remember { mutableStateOf(false) }
+
+        SideEffect {
+            focusRequesters[key] = requester
+            val values = focusRequesters.values.toList()
+            val index = values.indexOf(requester)
+            imeAction = if (index == values.size - 1) ImeAction.Done else ImeAction.Next
+        }
+
+        NullableStringFieldScope(
+            value = state.value ?: "",
+            onValueChange = { newValue -> onValueChange(newValue.ifEmpty { null }) },
+            onFocusLost = onFocusLost,
+            label = state.label,
+            hint = state.hint,
+            isOptional = state.isOptional,
             showError = state.showError,
             errorMessage = state.errorMessage,
             modifier = Modifier
