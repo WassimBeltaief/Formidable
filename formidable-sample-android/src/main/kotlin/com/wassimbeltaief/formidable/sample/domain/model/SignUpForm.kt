@@ -20,6 +20,9 @@ data class SignUpForm(
     @NotBlank(message = "Last name is required")
     val lastName: String = "",
 
+    @Field(label = "Nickname", hint = "How should we call you?", optional = true)
+    val nickname: String? = null,
+
     @Field(label = "Age", hint = "Your age")
     @IntRange(min = 18, max = 120, message = "Must be between 18 and 120")
     val age: Int = 0,

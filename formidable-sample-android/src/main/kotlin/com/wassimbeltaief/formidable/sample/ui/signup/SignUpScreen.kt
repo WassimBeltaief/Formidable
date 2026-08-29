@@ -31,6 +31,7 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
     val usernameState by viewModel.controller.username.collectAsState()
     val firstNameState by viewModel.controller.firstName.collectAsState()
     val lastNameState by viewModel.controller.lastName.collectAsState()
+    val nicknameState by viewModel.controller.nickname.collectAsState()
     val ageState by viewModel.controller.age.collectAsState()
     val acceptTermsState by viewModel.controller.acceptTerms.collectAsState()
 
@@ -127,6 +128,27 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
                     onValueChange = onValueChange,
                     modifier = modifier.fillMaxWidth(),
                     label = { Text(label) },
+                    placeholder = { Text(hint) },
+                    isError = showError,
+                    supportingText = if (showError) {
+                        { Text(errorMessage ?: "") }
+                    } else null,
+                    keyboardOptions = keyboardOptions,
+                    keyboardActions = keyboardActions,
+                    singleLine = true,
+                )
+            }
+            Spacer(Modifier.height(16.dp))
+            NullableStringField(
+                state = nicknameState,
+                onValueChange = { viewModel.controller.updateNickname(it) },
+                onFocusLost = { viewModel.controller.touchNickname() },
+            ) {
+                OutlinedTextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    modifier = modifier.fillMaxWidth(),
+                    label = { Text(if (isOptional) "$label (optional)" else label) },
                     placeholder = { Text(hint) },
                     isError = showError,
                     supportingText = if (showError) {
