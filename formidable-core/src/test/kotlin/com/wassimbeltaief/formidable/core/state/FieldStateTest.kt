@@ -55,4 +55,23 @@ class FieldStateTest {
         val state = FieldState(value = "new", initialValue = "old", isDirty = true)
         assertTrue(state.isDirty)
     }
+
+    @Test
+    fun `isOptional defaults to false`() {
+        val state = FieldState(value = "test", initialValue = "test")
+        assertFalse(state.isOptional)
+    }
+
+    @Test
+    fun `isOptional can be set to true`() {
+        val state = FieldState(value = "test", initialValue = "test", isOptional = true)
+        assertTrue(state.isOptional)
+    }
+
+    @Test
+    fun `nullable string field state supports null value`() {
+        val state = FieldState<String?>(value = null, initialValue = null)
+        assertNull(state.value)
+        assertTrue(state.isValid)
+    }
 }

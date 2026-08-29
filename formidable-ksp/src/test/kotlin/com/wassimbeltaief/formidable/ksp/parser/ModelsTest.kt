@@ -10,6 +10,8 @@ class ModelsTest {
         val field = FieldModel(
             name = "email",
             type = FieldType.STRING,
+            isNullable = false,
+            isOptional = false,
             label = "Email address",
             hint = "you@example.com",
             validators = listOf(ValidatorRule.NotBlank("Required")),
@@ -17,14 +19,32 @@ class ModelsTest {
 
         assertEquals("email", field.name)
         assertEquals(FieldType.STRING, field.type)
+        assertEquals(false, field.isNullable)
+        assertEquals(false, field.isOptional)
         assertEquals("Email address", field.label)
         assertEquals("you@example.com", field.hint)
         assertEquals(1, field.validators.size)
     }
 
     @Test
+    fun `FieldModel supports nullable and optional flags`() {
+        val field = FieldModel(
+            name = "nickname",
+            type = FieldType.STRING,
+            isNullable = true,
+            isOptional = true,
+            label = "Nickname",
+            hint = "Optional",
+            validators = emptyList(),
+        )
+
+        assertEquals(true, field.isNullable)
+        assertEquals(true, field.isOptional)
+    }
+
+    @Test
     fun `SchemaModel stores package, class name, and fields`() {
-        val field = FieldModel("name", FieldType.STRING, "Name", "", emptyList())
+        val field = FieldModel("name", FieldType.STRING, false, false, "Name", "", emptyList())
         val schema = SchemaModel("com.example", "LoginForm", listOf(field))
 
         assertEquals("com.example", schema.packageName)

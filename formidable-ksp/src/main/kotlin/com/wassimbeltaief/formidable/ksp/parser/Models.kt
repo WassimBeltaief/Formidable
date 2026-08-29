@@ -20,6 +20,8 @@ internal sealed class ValidatorRule {
 internal data class FieldModel(
     val name: String,
     val type: FieldType,
+    val isNullable: Boolean,
+    val isOptional: Boolean,
     val label: String,
     val hint: String,
     val validators: List<ValidatorRule>,

@@ -25,25 +25,30 @@ internal class SchemaParser(private val logger: KSPLogger) {
     }
 
     private fun parseField(prop: KSPropertyDeclaration): FieldModel? {
-        val type = resolveFieldType(prop) ?: return null
+        val resolvedType = prop.type.resolve()
+        val type = resolveFieldType(resolvedType) ?: return null
+        val isNullable = resolvedType.isMarkedNullable
         val name = prop.simpleName.asString()
         val annotations = prop.annotations.toList()
 
         val fieldAnnotation = annotations.findByFqn("$PKG.Field")
         val label = fieldAnnotation?.getArg("label") ?: ""
         val hint = fieldAnnotation?.getArg("hint") ?: ""
+        val isOptional = fieldAnnotation?.getArg("optional") ?: false
 
         return FieldModel(
             name = name,
             type = type,
+            isNullable = isNullable,
+            isOptional = isOptional,
             label = label,
             hint = hint,
             validators = buildValidators(annotations, type),
         )
     }
 
-    private fun resolveFieldType(prop: KSPropertyDeclaration): FieldType? {
-        val typeName = prop.type.resolve().declaration.qualifiedName?.asString()
+    private fun resolveFieldType(resolvedType: KSType): FieldType? {
+        val typeName = resolvedType.declaration.qualifiedName?.asString()
         return when (typeName) {
             "kotlin.String" -> FieldType.STRING
             "kotlin.Boolean" -> FieldType.BOOLEAN

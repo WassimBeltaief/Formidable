@@ -62,7 +62,10 @@ internal class FormStateGenerator {
     // -------------------------------------------------------------------------
 
     private fun fieldStateType(field: FieldModel) = when (field.type) {
-        FieldType.STRING -> fieldStateClass.parameterizedBy(STRING)
+        FieldType.STRING -> {
+            val stringType = if (field.isNullable) STRING.copy(nullable = true) else STRING
+            fieldStateClass.parameterizedBy(stringType)
+        }
         FieldType.BOOLEAN -> fieldStateClass.parameterizedBy(BOOLEAN)
         FieldType.INT -> fieldStateClass.parameterizedBy(INT)
     }
@@ -93,16 +96,16 @@ internal class FormStateGenerator {
                     val initializer = if (syncValidators.isEmpty()) {
                         buildCodeBlock {
                             add(
-                                "%T(%T(value = initial.%N, initialValue = initial.%N, label = %S, hint = %S))",
+                                "%T(%T(value = initial.%N, initialValue = initial.%N, label = %S, hint = %S, isOptional = %L))",
                                 mutableStateFlowClass, fieldStateClass,
-                                field.name, field.name, field.label, field.hint,
+                                field.name, field.name, field.label, field.hint, field.isOptional,
                             )
                         }
                     } else {
                         buildCodeBlock {
-                            add("%T(%T(value = initial.%N, initialValue = initial.%N, label = %S, hint = %S, errors = (",
+                            add("%T(%T(value = initial.%N, initialValue = initial.%N, label = %S, hint = %S, isOptional = %L, errors = (",
                                 mutableStateFlowClass, fieldStateClass,
-                                field.name, field.name, field.label, field.hint,
+                                field.name, field.name, field.label, field.hint, field.isOptional,
                             )
                             add(runValidatorsExpr(syncValidators, "initial.${field.name}"))
                             add(").errorsOrEmpty()))")
@@ -199,7 +202,7 @@ internal class FormStateGenerator {
         val paramType = when (field.type) {
             FieldType.BOOLEAN -> BOOLEAN
             FieldType.INT -> INT
-            else -> STRING
+            FieldType.STRING -> if (field.isNullable) STRING.copy(nullable = true) else STRING
         }
         return FunSpec.builder("update${field.name.capitalize()}")
             .addParameter("value", paramType)
@@ -267,8 +270,8 @@ internal class FormStateGenerator {
             .addCode(buildCodeBlock {
                 for (field in schema.fields) {
                     addStatement(
-                        "_%N.value = %T(value = initial.%N, initialValue = initial.%N, label = %S, hint = %S)",
-                        field.name, fieldStateClass, field.name, field.name, field.label, field.hint,
+                        "_%N.value = %T(value = initial.%N, initialValue = initial.%N, label = %S, hint = %S, isOptional = %L)",
+                        field.name, fieldStateClass, field.name, field.name, field.label, field.hint, field.isOptional,
                     )
                 }
             })
@@ -282,7 +285,13 @@ internal class FormStateGenerator {
                 for (field in schema.fields) {
                     beginControlFlow("_%N.%M { s ->", field.name, updateFn)
                     when (field.type) {
-                        FieldType.STRING -> addStatement("""s.copy(value = "", isDirty = "" != s.initialValue, errors = emptyList())""")
+                        FieldType.STRING -> {
+                            if (field.isNullable) {
+                                addStatement("s.copy(value = null, isDirty = null != s.initialValue, errors = emptyList())")
+                            } else {
+                                addStatement("""s.copy(value = "", isDirty = "" != s.initialValue, errors = emptyList())""")
+                            }
+                        }
                         FieldType.BOOLEAN -> addStatement("s.copy(value = false, isDirty = false != s.initialValue, errors = emptyList())")
                         FieldType.INT -> addStatement("s.copy(value = 0, isDirty = 0 != s.initialValue, errors = emptyList())")
                     }

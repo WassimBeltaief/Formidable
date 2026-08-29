@@ -83,10 +83,17 @@ class FormStateGeneratorTest {
 
     @Test
     fun `label and hint embedded in per-field initializer`() {
-        val field = FieldModel("email", FieldType.STRING, "Email", "you@example.com", emptyList())
+        val field = FieldModel("email", FieldType.STRING, false, false, "Email", "you@example.com", emptyList())
         val src = generate(field)
         assertTrue(src.contains("Email"))
         assertTrue(src.contains("you@example.com"))
+    }
+
+    @Test
+    fun `isOptional is embedded in per-field initializer`() {
+        val field = FieldModel("nickname", FieldType.STRING, true, true, "Nickname", "", emptyList())
+        val src = generate(field)
+        assertTrue(src.contains("isOptional = true"))
     }
 
     // --- per-field functions ---
@@ -161,9 +168,51 @@ class FormStateGeneratorTest {
         assertFalse(generate(stringField("email")).contains("fun errorsOrEmpty"))
     }
 
+    // --- nullable string support ---
+
+    @Test
+    fun `nullable string field generates FieldState with nullable type parameter`() {
+        val src = generate(nullableStringField("nickname"))
+        assertTrue(src.contains("FieldState<String?>"))
+    }
+
+    @Test
+    fun `nullable string update function takes nullable parameter`() {
+        val src = generate(nullableStringField("nickname"))
+        assertTrue(src.contains("fun updateNickname(`value`: String?)"))
+    }
+
+    @Test
+    fun `clear sets nullable string to null`() {
+        val src = generate(nullableStringField("nickname"))
+        val clearIdx = src.indexOf("fun clear()")
+        val afterClear = src.substring(clearIdx)
+        assertTrue(afterClear.contains("value = null"))
+    }
+
+    @Test
+    fun `clear sets non-nullable string to empty`() {
+        val src = generate(stringField("email"))
+        val clearIdx = src.indexOf("fun clear()")
+        val afterClear = src.substring(clearIdx)
+        assertTrue(afterClear.contains("value = \"\""))
+    }
+
     private fun stringField(name: String, vararg validators: ValidatorRule) = FieldModel(
         name = name,
         type = FieldType.STRING,
+        isNullable = false,
+        isOptional = false,
+        label = "",
+        hint = "",
+        validators = validators.toList(),
+    )
+
+    private fun nullableStringField(name: String, vararg validators: ValidatorRule) = FieldModel(
+        name = name,
+        type = FieldType.STRING,
+        isNullable = true,
+        isOptional = true,
         label = "",
         hint = "",
         validators = validators.toList(),
