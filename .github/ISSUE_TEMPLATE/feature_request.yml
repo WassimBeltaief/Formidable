@@ -1,0 +1,52 @@
+name: Feature Request
+description: Propose a new feature or improvement
+labels: ["enhancement"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Feature requests are welcome. Please read [CONTRIBUTING.md](../../CONTRIBUTING.md) before submitting — especially the section on what we're not looking for.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the use case. What can't you do today?
+      placeholder: I'm trying to do X but there's no way to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How would you like this to work? Include API design if possible.
+      render: kotlin
+      placeholder: |
+        @FormSchema
+        data class MyForm(
+            @NewAnnotation(...)
+            val field: String = ""
+        )
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Have you found any workarounds? Why aren't they sufficient?
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      description: Which module(s) would this affect?
+      options:
+        - label: formidable-core (annotations, state, validators)
+        - label: formidable-ksp (code generation)
+        - label: formidable-compose (Compose integration)
+        - label: New module
