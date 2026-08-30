@@ -32,6 +32,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.wassimbeltaief.formidable.compose.Formidable
 import com.wassimbeltaief.formidable.sample.R
+import com.wassimbeltaief.formidable.sample.domain.model.ContactMethod
 
 @Composable
 fun SignUpScreen(viewModel: SignUpViewModel) {
@@ -244,36 +245,50 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
                 )
             }
             Spacer(Modifier.height(24.dp))
-            Text(
-                text = contactMethodState.label,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Column(Modifier.selectableGroup()) {
-                listOf("email" to "Email", "phone" to "Phone").forEach { (value, label) ->
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .selectable(
-                                selected = contactMethodState.value == value,
-                                onClick = { viewModel.controller.updateContactMethod(value) },
-                                role = Role.RadioButton,
-                            ),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        RadioButton(
-                            selected = contactMethodState.value == value,
-                            onClick = null,
+            EnumField(
+                state = contactMethodState,
+                options = ContactMethod.entries,
+                onSelect = {
+                    viewModel.controller.updateContactMethod(it)
+                    viewModel.controller.touchContactMethod()
+                },
+            ) {
+                Column {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Column(Modifier.selectableGroup()) {
+                        options.forEach { option ->
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .selectable(
+                                        selected = selected == option,
+                                        onClick = { onSelect(option) },
+                                        role = Role.RadioButton,
+                                    ),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                RadioButton(
+                                    selected = selected == option,
+                                    onClick = null,
+                                )
+                                Text(
+                                    option.name.lowercase().replaceFirstChar { it.uppercase() },
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
+                            }
+                        }
+                    }
+                    if (showError) {
+                        Text(
+                            text = errorMessage ?: "",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.labelMedium,
                         )
-                        Text(label, style = MaterialTheme.typography.bodyMedium)
                     }
                 }
-            }
-            if (contactMethodState.showError) {
-                Text(
-                    text = contactMethodState.errorMessage ?: "",
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.labelMedium,
-                )
             }
 
             AnimatedVisibility(visible = emailState.isVisible) {
