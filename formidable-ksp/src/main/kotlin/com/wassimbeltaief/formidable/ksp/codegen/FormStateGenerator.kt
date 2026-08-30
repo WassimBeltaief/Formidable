@@ -46,6 +46,9 @@ private val stateInFn = MemberName("kotlinx.coroutines.flow", "stateIn")
 private val sharingStartedClass = ClassName("kotlinx.coroutines.flow", "SharingStarted")
 private val coroutineScopeClass = ClassName("kotlinx.coroutines", "CoroutineScope")
 private val dispatchersClass = ClassName("kotlinx.coroutines", "Dispatchers")
+private val jobClass = ClassName("kotlinx.coroutines", "Job")
+private val launchFn = MemberName("kotlinx.coroutines", "launch")
+private val delayFn = MemberName("kotlinx.coroutines", "delay")
 
 internal class FormStateGenerator {
 
@@ -81,6 +84,9 @@ internal class FormStateGenerator {
     ): TypeSpec {
         val mutableStatusFlow = mutableStateFlowClass.parameterizedBy(formStatusClass)
         val publicStatusFlow = stateFlowClass.parameterizedBy(formStatusClass)
+        val hasAsyncValidators = schema.fields.any { field ->
+            field.validators.any { it is ValidatorRule.Async }
+        }
 
         return TypeSpec.classBuilder(holderClass)
             .addSuperinterface(formControllerClass.parameterizedBy(schemaClass))
@@ -90,6 +96,24 @@ internal class FormStateGenerator {
                     .initializer("initial")
                     .build()
             )
+            .apply {
+                if (hasAsyncValidators) {
+                    addProperty(
+                        PropertySpec.builder("validationScope", coroutineScopeClass, KModifier.PRIVATE)
+                            .initializer("%T(%T.Default)", coroutineScopeClass, dispatchersClass)
+                            .build()
+                    )
+                    addProperty(
+                        PropertySpec.builder(
+                            "validationJobs",
+                            ClassName("kotlin.collections", "MutableMap").parameterizedBy(STRING, jobClass),
+                            KModifier.PRIVATE
+                        )
+                            .initializer("mutableMapOf()")
+                            .build()
+                    )
+                }
+            }
             // One private MutableStateFlow + one public StateFlow per field
             .apply {
                 for (field in schema.fields) {
@@ -211,7 +235,7 @@ internal class FormStateGenerator {
 
     private fun buildUpdateFn(field: FieldModel, schema: SchemaModel): FunSpec {
         val syncValidators = field.validators.filterNot { it is ValidatorRule.Async }
-        val needsFormData = hasCrossFieldValidators(syncValidators)
+        val asyncValidators = field.validators.filterIsInstance<ValidatorRule.Async>()
         val paramType = when (field.type) {
             FieldType.BOOLEAN -> BOOLEAN
             FieldType.INT -> INT
@@ -223,19 +247,54 @@ internal class FormStateGenerator {
         return FunSpec.builder("update${field.name.capitalize()}")
             .addParameter("value", paramType)
             .addCode(buildCodeBlock {
+                if (asyncValidators.isNotEmpty()) {
+                    addStatement("validationJobs[%S]?.cancel()", field.name)
+                }
+
                 beginControlFlow("_%N.%M { s ->", field.name, updateFn)
                 if (syncValidators.isEmpty()) {
-                    addStatement("s.copy(value = value, isDirty = value != s.initialValue, errors = emptyList())")
+                    if (asyncValidators.isNotEmpty()) {
+                        addStatement("s.copy(value = value, isDirty = value != s.initialValue, errors = emptyList(), isValidating = true)")
+                    } else {
+                        addStatement("s.copy(value = value, isDirty = value != s.initialValue, errors = emptyList())")
+                    }
                 } else {
                     add("val formData = buildFormData(%S to value)\n", field.name)
                     add("val errors = ")
                     add(runValidatorsExpr(syncValidators, "value", "formData"))
                     addStatement(".errorsOrEmpty()")
-                    addStatement("s.copy(value = value, isDirty = value != s.initialValue, errors = errors)")
+                    if (asyncValidators.isNotEmpty()) {
+                        addStatement("s.copy(value = value, isDirty = value != s.initialValue, errors = errors, isValidating = errors.isEmpty())")
+                    } else {
+                        addStatement("s.copy(value = value, isDirty = value != s.initialValue, errors = errors)")
+                    }
                 }
                 endControlFlow()
 
+                if (asyncValidators.isNotEmpty()) {
+                    addStatement("")
+                    beginControlFlow("if (_%N.value.errors.isEmpty())", field.name)
+                    beginControlFlow("validationJobs[%S] = validationScope.%M", field.name, launchFn)
+                    addStatement("%M(300)", delayFn)
+                    addStatement("val currentValue = _%N.value.value", field.name)
+                    for ((index, async) in asyncValidators.withIndex()) {
+                        addStatement("val asyncResult$index = %T().validate(currentValue)", ClassName.bestGuess(async.validatorFqn))
+                        beginControlFlow("if (!asyncResult$index.isValid)")
+                        beginControlFlow("_%N.%M { s ->", field.name, updateFn)
+                        addStatement("s.copy(errors = asyncResult$index.errorsOrEmpty(), isValidating = false)")
+                        endControlFlow()
+                        addStatement("return@launch")
+                        endControlFlow()
+                    }
+                    beginControlFlow("_%N.%M { s ->", field.name, updateFn)
+                    addStatement("s.copy(isValidating = false)")
+                    endControlFlow()
+                    endControlFlow()
+                    endControlFlow()
+                }
+
                 if (dependentFields.isNotEmpty()) {
+                    addStatement("")
                     addStatement("val visited = mutableSetOf(%S)", field.name)
                     for (dep in dependentFields) {
                         addStatement("revalidateAndUpdateVisibility(%S, visited)", dep.name)
