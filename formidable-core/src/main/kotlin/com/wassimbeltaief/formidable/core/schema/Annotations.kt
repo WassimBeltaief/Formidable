@@ -18,6 +18,7 @@ public annotation class Field(
 @Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.SOURCE)
 public annotation class NotBlank(
+    val order: Int = 0,
     val message: String = "",
 )
 
@@ -25,6 +26,7 @@ public annotation class NotBlank(
 @Retention(AnnotationRetention.SOURCE)
 public annotation class MinLength(
     val min: Int,
+    val order: Int = 0,
     val message: String = "",
 )
 
@@ -32,12 +34,14 @@ public annotation class MinLength(
 @Retention(AnnotationRetention.SOURCE)
 public annotation class MaxLength(
     val max: Int,
+    val order: Int = 0,
     val message: String = "",
 )
 
 @Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.SOURCE)
 public annotation class Email(
+    val order: Int = 0,
     val message: String = "",
 )
 
@@ -45,12 +49,14 @@ public annotation class Email(
 @Retention(AnnotationRetention.SOURCE)
 public annotation class Pattern(
     val regex: String,
+    val order: Int = 0,
     val message: String = "",
 )
 
 @Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.SOURCE)
 public annotation class MustBeTrue(
+    val order: Int = 0,
     val message: String = "",
 )
 
@@ -59,7 +65,24 @@ public annotation class MustBeTrue(
 public annotation class IntRange(
     val min: Int = Int.MIN_VALUE,
     val max: Int = Int.MAX_VALUE,
+    val order: Int = 0,
     val message: String = "",
+)
+
+@Target(AnnotationTarget.PROPERTY)
+@Retention(AnnotationRetention.SOURCE)
+public annotation class RequiredIf(
+    val targetField: String,
+    val targetValue: String,
+    val order: Int = 0,
+    val message: String = "",
+)
+
+@Target(AnnotationTarget.PROPERTY)
+@Retention(AnnotationRetention.SOURCE)
+public annotation class VisibleWhen(
+    val targetField: String,
+    val targetValue: String,
 )
 
 @Target(AnnotationTarget.PROPERTY)

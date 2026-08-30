@@ -9,6 +9,7 @@ public data class FieldState<T>(
     val label: String = "",
     val hint: String = "",
     val isOptional: Boolean = false,
+    val isVisible: Boolean = true,
 ) {
     public val isValid: Boolean get() = errors.isEmpty()
     public val showError: Boolean get() = isTouched && errors.isNotEmpty()
