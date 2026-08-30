@@ -87,5 +87,13 @@ public annotation class VisibleWhen(
 
 @Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.SOURCE)
+public annotation class MatchField(
+    val targetField: String,
+    val order: Int = 0,
+    val message: String = "",
+)
+
+@Target(AnnotationTarget.PROPERTY)
+@Retention(AnnotationRetention.SOURCE)
 public annotation class AsyncValidation(val validator: KClass<out AsyncFieldValidator<*>>)
 
