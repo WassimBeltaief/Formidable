@@ -33,7 +33,8 @@ jobs:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
         run: |
-          ./gradlew :formidable-core:publishMavenPublicationToSonatypeRepository \
+          ./gradlew --no-configuration-cache \
+                    :formidable-core:publishMavenPublicationToSonatypeRepository \
                     :formidable-ksp:publishMavenPublicationToSonatypeRepository \
                     :formidable-compose:publishReleasePublicationToSonatypeRepository
 
