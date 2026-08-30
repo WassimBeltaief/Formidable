@@ -1,5 +1,6 @@
 package com.wassimbeltaief.formidable.sample.ui.signup
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,11 +9,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -20,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.wassimbeltaief.formidable.compose.Formidable
 import com.wassimbeltaief.formidable.sample.R
@@ -33,6 +38,9 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
     val lastNameState by viewModel.controller.lastName.collectAsState()
     val nicknameState by viewModel.controller.nickname.collectAsState()
     val ageState by viewModel.controller.age.collectAsState()
+    val contactMethodState by viewModel.controller.contactMethod.collectAsState()
+    val emailState by viewModel.controller.email.collectAsState()
+    val phoneState by viewModel.controller.phone.collectAsState()
     val acceptTermsState by viewModel.controller.acceptTerms.collectAsState()
 
     val isFormValid by viewModel.controller.isValid.collectAsState()
@@ -180,7 +188,92 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
                     singleLine = true,
                 )
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(24.dp))
+            Text(
+                text = contactMethodState.label,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Column(Modifier.selectableGroup()) {
+                listOf("email" to "Email", "phone" to "Phone").forEach { (value, label) ->
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .selectable(
+                                selected = contactMethodState.value == value,
+                                onClick = { viewModel.controller.updateContactMethod(value) },
+                                role = Role.RadioButton,
+                            ),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
+                            selected = contactMethodState.value == value,
+                            onClick = null,
+                        )
+                        Text(label, style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+            if (contactMethodState.showError) {
+                Text(
+                    text = contactMethodState.errorMessage ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
+
+            AnimatedVisibility(visible = emailState.isVisible) {
+                Column {
+                    Spacer(Modifier.height(16.dp))
+                    NullableStringField(
+                        state = emailState,
+                        onValueChange = { viewModel.controller.updateEmail(it) },
+                        onFocusLost = { viewModel.controller.touchEmail() },
+                    ) {
+                        OutlinedTextField(
+                            value = value,
+                            onValueChange = onValueChange,
+                            modifier = modifier.fillMaxWidth(),
+                            label = { Text(label) },
+                            placeholder = { Text(hint) },
+                            isError = showError,
+                            supportingText = if (showError) {
+                                { Text(errorMessage ?: "") }
+                            } else null,
+                            keyboardOptions = keyboardOptions,
+                            keyboardActions = keyboardActions,
+                            singleLine = true,
+                        )
+                    }
+                }
+            }
+
+            AnimatedVisibility(visible = phoneState.isVisible) {
+                Column {
+                    Spacer(Modifier.height(16.dp))
+                    NullableStringField(
+                        state = phoneState,
+                        onValueChange = { viewModel.controller.updatePhone(it) },
+                        onFocusLost = { viewModel.controller.touchPhone() },
+                    ) {
+                        OutlinedTextField(
+                            value = value,
+                            onValueChange = onValueChange,
+                            modifier = modifier.fillMaxWidth(),
+                            label = { Text(label) },
+                            placeholder = { Text(hint) },
+                            isError = showError,
+                            supportingText = if (showError) {
+                                { Text(errorMessage ?: "") }
+                            } else null,
+                            keyboardOptions = keyboardOptions,
+                            keyboardActions = keyboardActions,
+                            singleLine = true,
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
             BooleanField(
                 state = acceptTermsState,
                 onCheckedChange = { viewModel.controller.updateAcceptTerms(it) },
