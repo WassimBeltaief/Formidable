@@ -6,7 +6,7 @@ import com.wassimbeltaief.formidable.core.validation.FieldValidator
 public class MustBeTrueValidator(
     private val message: String = "Must be accepted",
 ) : FieldValidator<Boolean> {
-    override fun validate(value: Boolean): ValidationResult =
+    override fun validate(value: Boolean, formData: Map<String, Any?>): ValidationResult =
         if (value) ValidationResult.Valid
         else ValidationResult.Invalid(listOf(message))
 }
