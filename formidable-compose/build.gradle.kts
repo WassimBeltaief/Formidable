@@ -1,5 +1,5 @@
 plugins {
-    id("formidable.android-library")
+    id("formidable.android-library-published")
 }
 
 android {
