@@ -9,17 +9,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.runtime.Composable
@@ -28,12 +33,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.wassimbeltaief.formidable.compose.Formidable
 import com.wassimbeltaief.formidable.sample.R
 import com.wassimbeltaief.formidable.sample.domain.model.ContactMethod
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(viewModel: SignUpViewModel) {
     val submitted by viewModel.submitted.collectAsState()
@@ -253,40 +258,37 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
                     viewModel.controller.touchContactMethod()
                 },
             ) {
-                Column {
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.bodyMedium,
+                var expanded by remember { mutableStateOf(false) }
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = it },
+                    modifier = modifier.fillMaxWidth(),
+                ) {
+                    OutlinedTextField(
+                        value = selected.name.lowercase().replaceFirstChar { it.uppercase() },
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text(label) },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        isError = showError,
+                        supportingText = if (showError) {{ Text(errorMessage ?: "") }} else null,
+                        modifier = Modifier
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                            .fillMaxWidth(),
                     )
-                    Column(Modifier.selectableGroup()) {
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                    ) {
                         options.forEach { option ->
-                            Row(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .selectable(
-                                        selected = selected == option,
-                                        onClick = { onSelect(option) },
-                                        role = Role.RadioButton,
-                                    ),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(
-                                    selected = selected == option,
-                                    onClick = null,
-                                )
-                                Text(
-                                    option.name.lowercase().replaceFirstChar { it.uppercase() },
-                                    style = MaterialTheme.typography.bodyMedium,
-                                )
-                            }
+                            DropdownMenuItem(
+                                text = { Text(option.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                                onClick = {
+                                    onSelect(option)
+                                    expanded = false
+                                },
+                            )
                         }
-                    }
-                    if (showError) {
-                        Text(
-                            text = errorMessage ?: "",
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.labelMedium,
-                        )
                     }
                 }
             }
