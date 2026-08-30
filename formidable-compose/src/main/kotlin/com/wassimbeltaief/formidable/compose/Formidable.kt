@@ -175,6 +175,46 @@ public class FormScope internal constructor() {
             ),
         ).content()
     }
+
+    @Composable
+    public fun <T : Enum<T>> EnumField(
+        state: FieldState<T>,
+        options: List<T>,
+        onSelect: (T) -> Unit,
+        content: @Composable EnumFieldScope<T>.() -> Unit,
+    ) {
+        EnumFieldScope(
+            selected = state.value,
+            options = options,
+            onSelect = onSelect,
+            label = state.label,
+            hint = state.hint,
+            isOptional = state.isOptional,
+            showError = state.showError,
+            errorMessage = state.errorMessage,
+            modifier = Modifier,
+        ).content()
+    }
+
+    @Composable
+    public fun <T : Enum<T>> NullableEnumField(
+        state: FieldState<T?>,
+        options: List<T>,
+        onSelect: (T?) -> Unit,
+        content: @Composable NullableEnumFieldScope<T>.() -> Unit,
+    ) {
+        NullableEnumFieldScope(
+            selected = state.value,
+            options = options,
+            onSelect = onSelect,
+            label = state.label,
+            hint = state.hint,
+            isOptional = state.isOptional,
+            showError = state.showError,
+            errorMessage = state.errorMessage,
+            modifier = Modifier,
+        ).content()
+    }
 }
 
 @Composable
