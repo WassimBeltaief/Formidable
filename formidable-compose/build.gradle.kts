@@ -10,7 +10,7 @@ android {
     }
 
     lint {
-        disable += "RememberInComposition"
+        disable += setOf("RememberInComposition", "FrequentlyChangingValue")
     }
 
     kotlinOptions {
