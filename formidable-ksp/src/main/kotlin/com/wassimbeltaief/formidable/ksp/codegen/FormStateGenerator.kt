@@ -49,7 +49,6 @@ private val coroutineScopeClass = ClassName("kotlinx.coroutines", "CoroutineScop
 private val dispatchersClass = ClassName("kotlinx.coroutines", "Dispatchers")
 private val jobClass = ClassName("kotlinx.coroutines", "Job")
 private val launchFn = MemberName("kotlinx.coroutines", "launch")
-private val delayFn = MemberName("kotlinx.coroutines", "delay")
 
 internal class FormStateGenerator {
 
@@ -276,7 +275,6 @@ internal class FormStateGenerator {
                     addStatement("")
                     beginControlFlow("if (_%N.value.errors.isEmpty())", field.name)
                     beginControlFlow("validationJobs[%S] = validationScope.%M", field.name, launchFn)
-                    addStatement("%M(300)", delayFn)
                     addStatement("val currentValue = _%N.value.value", field.name)
                     for ((index, async) in asyncValidators.withIndex()) {
                         addStatement("val asyncResult$index = %T().validate(currentValue)", ClassName.bestGuess(async.validatorFqn))
