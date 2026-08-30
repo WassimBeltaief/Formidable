@@ -14,7 +14,7 @@ class ModelsTest {
             isOptional = false,
             label = "Email address",
             hint = "you@example.com",
-            validators = listOf(ValidatorRule.NotBlank("Required")),
+            validators = listOf(ValidatorRule.NotBlank(0, "Required")),
         )
 
         assertEquals("email", field.name)
@@ -54,12 +54,25 @@ class ModelsTest {
 
     @Test
     fun `ValidatorRule subtypes hold their data`() {
-        val notBlank = ValidatorRule.NotBlank("Required")
-        val minLength = ValidatorRule.MinLength(8, "Too short")
-        val async = ValidatorRule.Async("com.example.UniqueEmailValidator")
+        val notBlank = ValidatorRule.NotBlank(0, "Required")
+        val minLength = ValidatorRule.MinLength(0, 8, "Too short")
+        val async = ValidatorRule.Async(validatorFqn = "com.example.UniqueEmailValidator")
 
         assertEquals("Required", notBlank.message)
         assertEquals(8, minLength.min)
         assertEquals("com.example.UniqueEmailValidator", async.validatorFqn)
+    }
+
+    @Test
+    fun `ValidatorRule order is used for sorting`() {
+        val v1 = ValidatorRule.Email(2, "Invalid")
+        val v2 = ValidatorRule.RequiredIf(1, "field", "value", "Required")
+        val v3 = ValidatorRule.NotBlank(0, "Blank")
+
+        val sorted = listOf(v1, v2, v3).sortedBy { it.order }
+
+        assertEquals(0, sorted[0].order)
+        assertEquals(1, sorted[1].order)
+        assertEquals(2, sorted[2].order)
     }
 }

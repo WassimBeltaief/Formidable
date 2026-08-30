@@ -9,15 +9,24 @@ internal enum class FieldType {
 
 /** A validator rule captured from an annotation on a property. */
 internal sealed class ValidatorRule {
-    data class NotBlank(val message: String) : ValidatorRule()
-    data class MinLength(val min: Int, val message: String) : ValidatorRule()
-    data class MaxLength(val max: Int, val message: String) : ValidatorRule()
-    data class Email(val message: String) : ValidatorRule()
-    data class Pattern(val regex: String, val message: String) : ValidatorRule()
-    data class Async(val validatorFqn: String) : ValidatorRule()
-    data class MustBeTrue(val message: String) : ValidatorRule()
-    data class IntRange(val min: Int?, val max: Int?, val message: String) : ValidatorRule()
+    abstract val order: Int
+
+    data class NotBlank(override val order: Int, val message: String) : ValidatorRule()
+    data class MinLength(override val order: Int, val min: Int, val message: String) : ValidatorRule()
+    data class MaxLength(override val order: Int, val max: Int, val message: String) : ValidatorRule()
+    data class Email(override val order: Int, val message: String) : ValidatorRule()
+    data class Pattern(override val order: Int, val regex: String, val message: String) : ValidatorRule()
+    data class RequiredIf(override val order: Int, val targetField: String, val targetValue: String, val message: String) : ValidatorRule()
+    data class Async(override val order: Int = Int.MAX_VALUE, val validatorFqn: String) : ValidatorRule()
+    data class MustBeTrue(override val order: Int, val message: String) : ValidatorRule()
+    data class IntRange(override val order: Int, val min: Int?, val max: Int?, val message: String) : ValidatorRule()
 }
+
+/** Visibility rule captured from @VisibleWhen annotation. */
+internal data class VisibleWhenRule(
+    val targetField: String,
+    val targetValue: String,
+)
 
 /** Model for a single field in a @FormSchema class. */
 internal data class FieldModel(
@@ -28,6 +37,7 @@ internal data class FieldModel(
     val label: String,
     val hint: String,
     val validators: List<ValidatorRule>,
+    val visibleWhen: VisibleWhenRule? = null,
 )
 
 /** Model for an entire @FormSchema class. */

@@ -31,6 +31,7 @@ private val minLengthValidatorClass = ClassName("com.wassimbeltaief.formidable.c
 private val maxLengthValidatorClass = ClassName("com.wassimbeltaief.formidable.core.validation.builtin", "MaxLengthValidator")
 private val emailValidatorClass = ClassName("com.wassimbeltaief.formidable.core.validation.builtin", "EmailValidator")
 private val patternValidatorClass = ClassName("com.wassimbeltaief.formidable.core.validation.builtin", "PatternValidator")
+private val requiredIfValidatorClass = ClassName("com.wassimbeltaief.formidable.core.validation.builtin", "RequiredIfValidator")
 private val mustBeTrueValidatorClass = ClassName("com.wassimbeltaief.formidable.core.validation.builtin", "MustBeTrueValidator")
 private val intRangeValidatorClass = ClassName("com.wassimbeltaief.formidable.core.validation.builtin", "IntRangeValidator")
 private val validationResultClass = ClassName("com.wassimbeltaief.formidable.core.state", "ValidationResult")
@@ -96,19 +97,24 @@ internal class FormStateGenerator {
                     val mutableFlowType = mutableStateFlowClass.parameterizedBy(stateType)
                     val publicFlowType = stateFlowClass.parameterizedBy(stateType)
                     val syncValidators = field.validators.filterNot { it is ValidatorRule.Async }
+                    val visibleExpr = if (field.visibleWhen != null) {
+                        "initial.${field.visibleWhen.targetField}.toString() == \"${field.visibleWhen.targetValue}\""
+                    } else {
+                        "true"
+                    }
                     val initializer = if (syncValidators.isEmpty()) {
                         buildCodeBlock {
                             add(
-                                "%T(%T(value = initial.%N, initialValue = initial.%N, label = %S, hint = %S, isOptional = %L))",
+                                "%T(%T(value = initial.%N, initialValue = initial.%N, label = %S, hint = %S, isOptional = %L, isVisible = %L))",
                                 mutableStateFlowClass, fieldStateClass,
-                                field.name, field.name, field.label, field.hint, field.isOptional,
+                                field.name, field.name, field.label, field.hint, field.isOptional, visibleExpr,
                             )
                         }
                     } else {
                         buildCodeBlock {
-                            add("%T(%T(value = initial.%N, initialValue = initial.%N, label = %S, hint = %S, isOptional = %L, errors = (",
+                            add("%T(%T(value = initial.%N, initialValue = initial.%N, label = %S, hint = %S, isOptional = %L, isVisible = %L, errors = (",
                                 mutableStateFlowClass, fieldStateClass,
-                                field.name, field.name, field.label, field.hint, field.isOptional,
+                                field.name, field.name, field.label, field.hint, field.isOptional, visibleExpr,
                             )
                             add(runValidatorsExpr(syncValidators, "initial.${field.name}"))
                             add(").errorsOrEmpty()))")
@@ -144,13 +150,16 @@ internal class FormStateGenerator {
             // per-field functions
             .apply {
                 for (field in schema.fields) {
-                    addFunction(buildUpdateFn(field))
-                    addFunction(buildTouchFn(field))
+                    addFunction(buildUpdateFn(field, schema))
+                    addFunction(buildTouchFn(field, schema))
                 }
                 addFunction(buildValidateAllSyncFn(schema))
                 addFunction(buildResetFn(schema))
                 addFunction(buildClearFn(schema))
                 addFunction(buildSetFieldErrorFn(schema))
+                // helper functions
+                addFunction(buildFormDataFn(schema))
+                addFunction(buildRevalidateAndUpdateVisibilityFn(schema))
             }
             .build()
     }
@@ -172,8 +181,8 @@ internal class FormStateGenerator {
                 if (index > 0) add(", ")
                 add("_%N", field.name)
             }
-            add(") { states -> states.all { it.isValid } }\n")
-            add("    .%M(%T(%T.Default), %T.Eagerly, false)", stateInFn, coroutineScopeClass, dispatchersClass, sharingStartedClass)
+            add(") { states -> states.all { !it.isVisible || it.isValid } }\n")
+            add("    .%M(%T(%T.Default), %T.Eagerly, true)", stateInFn, coroutineScopeClass, dispatchersClass, sharingStartedClass)
         }
         return PropertySpec.builder("isValid", isValidType, KModifier.OVERRIDE)
             .initializer(code)
@@ -200,13 +209,17 @@ internal class FormStateGenerator {
     // Per-field update / touch
     // -------------------------------------------------------------------------
 
-    private fun buildUpdateFn(field: FieldModel): FunSpec {
+    private fun buildUpdateFn(field: FieldModel, schema: SchemaModel): FunSpec {
         val syncValidators = field.validators.filterNot { it is ValidatorRule.Async }
+        val needsFormData = hasCrossFieldValidators(syncValidators)
         val paramType = when (field.type) {
             FieldType.BOOLEAN -> BOOLEAN
             FieldType.INT -> INT
             FieldType.STRING -> if (field.isNullable) STRING.copy(nullable = true) else STRING
         }
+
+        val dependentFields = findDependentFields(field.name, schema)
+
         return FunSpec.builder("update${field.name.capitalize()}")
             .addParameter("value", paramType)
             .addCode(buildCodeBlock {
@@ -214,17 +227,25 @@ internal class FormStateGenerator {
                 if (syncValidators.isEmpty()) {
                     addStatement("s.copy(value = value, isDirty = value != s.initialValue, errors = emptyList())")
                 } else {
+                    add("val formData = buildFormData(%S to value)\n", field.name)
                     add("val errors = ")
-                    add(runValidatorsExpr(syncValidators, "value"))
+                    add(runValidatorsExpr(syncValidators, "value", "formData"))
                     addStatement(".errorsOrEmpty()")
                     addStatement("s.copy(value = value, isDirty = value != s.initialValue, errors = errors)")
                 }
                 endControlFlow()
+
+                if (dependentFields.isNotEmpty()) {
+                    addStatement("val visited = mutableSetOf(%S)", field.name)
+                    for (dep in dependentFields) {
+                        addStatement("revalidateAndUpdateVisibility(%S, visited)", dep.name)
+                    }
+                }
             })
             .build()
     }
 
-    private fun buildTouchFn(field: FieldModel): FunSpec {
+    private fun buildTouchFn(field: FieldModel, schema: SchemaModel): FunSpec {
         val syncValidators = field.validators.filterNot { it is ValidatorRule.Async }
         return FunSpec.builder("touch${field.name.capitalize()}")
             .addCode(buildCodeBlock {
@@ -232,8 +253,9 @@ internal class FormStateGenerator {
                 if (syncValidators.isEmpty()) {
                     addStatement("s.copy(isTouched = true)")
                 } else {
+                    addStatement("val formData = buildFormData()")
                     add("val errors = ")
-                    add(runValidatorsExpr(syncValidators, "s.value"))
+                    add(runValidatorsExpr(syncValidators, "s.value", "formData"))
                     addStatement(".errorsOrEmpty()")
                     addStatement("s.copy(isTouched = true, errors = errors)")
                 }
@@ -252,14 +274,19 @@ internal class FormStateGenerator {
             .returns(Boolean::class.asClassName())
             .addCode(buildCodeBlock {
                 addStatement("var allValid = true")
+                addStatement("val formData = buildFormData()")
                 for (field in schema.fields) {
                     val syncValidators = field.validators.filterNot { it is ValidatorRule.Async }
                     beginControlFlow("_%N.%M { s ->", field.name, updateFn)
+                    beginControlFlow("if (!s.isVisible)")
+                    addStatement("s.copy(isTouched = true)")
+                    nextControlFlow("else")
                     add("val errors = (")
-                    add(runValidatorsExpr(syncValidators, "s.value"))
+                    add(runValidatorsExpr(syncValidators, "s.value", "formData"))
                     addStatement(").errorsOrEmpty()")
                     addStatement("if (errors.isNotEmpty()) allValid = false")
                     addStatement("s.copy(isTouched = true, errors = errors)")
+                    endControlFlow()
                     endControlFlow()
                 }
                 addStatement("return allValid")
@@ -272,9 +299,14 @@ internal class FormStateGenerator {
             .addModifiers(KModifier.OVERRIDE)
             .addCode(buildCodeBlock {
                 for (field in schema.fields) {
+                    val visibleExpr = if (field.visibleWhen != null) {
+                        "initial.${field.visibleWhen.targetField}.toString() == \"${field.visibleWhen.targetValue}\""
+                    } else {
+                        "true"
+                    }
                     addStatement(
-                        "_%N.value = %T(value = initial.%N, initialValue = initial.%N, label = %S, hint = %S, isOptional = %L)",
-                        field.name, fieldStateClass, field.name, field.name, field.label, field.hint, field.isOptional,
+                        "_%N.value = %T(value = initial.%N, initialValue = initial.%N, label = %S, hint = %S, isOptional = %L, isVisible = %L)",
+                        field.name, fieldStateClass, field.name, field.name, field.label, field.hint, field.isOptional, visibleExpr,
                     )
                 }
             })
@@ -326,18 +358,21 @@ internal class FormStateGenerator {
     // Validator chaining
     // -------------------------------------------------------------------------
 
-    private fun runValidatorsExpr(validators: List<ValidatorRule>, valueExpr: String): CodeBlock {
+    private fun runValidatorsExpr(validators: List<ValidatorRule>, valueExpr: String, formDataExpr: String = "emptyMap()"): CodeBlock {
         if (validators.isEmpty()) return buildCodeBlock { add("%T.Valid", validationResultClass) }
         return buildCodeBlock {
             add(validatorConstructor(validators.first()))
-            add(".validate(%L)", valueExpr)
+            add(".validate(%L, %L)", valueExpr, formDataExpr)
             for (v in validators.drop(1)) {
                 add(".let { if (!it.isValid) it else ")
                 add(validatorConstructor(v))
-                add(".validate(%L) }", valueExpr)
+                add(".validate(%L, %L) }", valueExpr, formDataExpr)
             }
         }
     }
+
+    private fun hasCrossFieldValidators(validators: List<ValidatorRule>): Boolean =
+        validators.any { it is ValidatorRule.RequiredIf }
 
     private fun validatorConstructor(rule: ValidatorRule): CodeBlock = buildCodeBlock {
         when (rule) {
@@ -346,6 +381,7 @@ internal class FormStateGenerator {
             is ValidatorRule.MaxLength -> add("%T(%L, %S)", maxLengthValidatorClass, rule.max, rule.message)
             is ValidatorRule.Email -> add("%T(%S)", emailValidatorClass, rule.message)
             is ValidatorRule.Pattern -> add("%T(%S, %S)", patternValidatorClass, rule.regex, rule.message)
+            is ValidatorRule.RequiredIf -> add("%T(%S, %S, %S)", requiredIfValidatorClass, rule.targetField, rule.targetValue, rule.message)
             is ValidatorRule.MustBeTrue -> add("%T(%S)", mustBeTrueValidatorClass, rule.message)
             is ValidatorRule.IntRange -> {
                 val minArg = if (rule.min != null) "%L" else "null"
@@ -364,5 +400,88 @@ internal class FormStateGenerator {
             }
             is ValidatorRule.Async -> error("Async validators are not inlined — handled by the Compose layer")
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Helper function generators
+    // -------------------------------------------------------------------------
+
+    private fun findDependentFields(targetFieldName: String, schema: SchemaModel): List<FieldModel> {
+        return schema.fields.filter { field ->
+            val hasRequiredIfDep = field.validators.any {
+                it is ValidatorRule.RequiredIf && it.targetField == targetFieldName
+            }
+            val hasVisibleWhenDep = field.visibleWhen?.targetField == targetFieldName
+            hasRequiredIfDep || hasVisibleWhenDep
+        }
+    }
+
+    private fun buildFormDataFn(schema: SchemaModel): FunSpec {
+        return FunSpec.builder("buildFormData")
+            .addModifiers(KModifier.PRIVATE)
+            .addParameter(
+                ParameterSpec.builder("override", ClassName("kotlin", "Pair").parameterizedBy(STRING, ClassName("kotlin", "Any").copy(nullable = true)))
+                    .defaultValue("\"\" to null")
+                    .build()
+            )
+            .returns(ClassName("kotlin.collections", "Map").parameterizedBy(STRING, ClassName("kotlin", "Any").copy(nullable = true)))
+            .addCode(buildCodeBlock {
+                val entries = schema.fields.joinToString(", ") { f ->
+                    "\"${f.name}\" to (if (override.first == \"${f.name}\") override.second else _${f.name}.value.value)"
+                }
+                addStatement("return mapOf($entries)")
+            })
+            .build()
+    }
+
+    private fun buildRevalidateAndUpdateVisibilityFn(schema: SchemaModel): FunSpec {
+        return FunSpec.builder("revalidateAndUpdateVisibility")
+            .addModifiers(KModifier.PRIVATE)
+            .addParameter("fieldName", STRING)
+            .addParameter(
+                ParameterSpec.builder("visited", ClassName("kotlin.collections", "MutableSet").parameterizedBy(STRING))
+                    .defaultValue("mutableSetOf()")
+                    .build()
+            )
+            .addCode(buildCodeBlock {
+                addStatement("if (!visited.add(fieldName)) return")
+                addStatement("val formData = buildFormData()")
+                beginControlFlow("when (fieldName)")
+                for (field in schema.fields) {
+                    val syncValidators = field.validators.filterNot { it is ValidatorRule.Async }
+                    val dependents = findDependentFields(field.name, schema)
+                    beginControlFlow("%S ->", field.name)
+                    beginControlFlow("_%N.%M { s ->", field.name, updateFn)
+
+                    if (field.visibleWhen != null) {
+                        addStatement("val isVisible = formData[%S]?.toString() == %S",
+                            field.visibleWhen.targetField, field.visibleWhen.targetValue)
+                    }
+
+                    if (syncValidators.isEmpty()) {
+                        if (field.visibleWhen != null) {
+                            addStatement("s.copy(isVisible = isVisible)")
+                        } else {
+                            addStatement("s")
+                        }
+                    } else {
+                        add("val errors = ")
+                        add(runValidatorsExpr(syncValidators, "s.value", "formData"))
+                        addStatement(".errorsOrEmpty()")
+                        if (field.visibleWhen != null) {
+                            addStatement("s.copy(errors = errors, isVisible = isVisible)")
+                        } else {
+                            addStatement("s.copy(errors = errors)")
+                        }
+                    }
+                    endControlFlow()
+                    for (dep in dependents) {
+                        addStatement("revalidateAndUpdateVisibility(%S, visited)", dep.name)
+                    }
+                    endControlFlow()
+                }
+                endControlFlow()
+            })
+            .build()
     }
 }
