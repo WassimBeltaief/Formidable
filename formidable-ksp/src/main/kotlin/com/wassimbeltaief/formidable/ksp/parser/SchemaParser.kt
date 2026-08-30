@@ -1,6 +1,7 @@
 package com.wassimbeltaief.formidable.ksp.parser
 
 import com.google.devtools.ksp.processing.KSPLogger
+import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
@@ -43,6 +44,9 @@ internal class SchemaParser(private val logger: KSPLogger) {
         val isOptional = fieldAnnotation?.getArg("optional") ?: false
 
         val visibleWhen = parseVisibleWhen(annotations, allFieldNames, prop)
+        val enumFqn = if (type == FieldType.ENUM) {
+            resolvedType.declaration.qualifiedName?.asString()
+        } else null
 
         return FieldModel(
             name = name,
@@ -53,6 +57,7 @@ internal class SchemaParser(private val logger: KSPLogger) {
             hint = hint,
             validators = buildValidators(annotations, type, allFieldNames, prop),
             visibleWhen = visibleWhen,
+            enumFqn = enumFqn,
         )
     }
 
@@ -78,7 +83,12 @@ internal class SchemaParser(private val logger: KSPLogger) {
             "kotlin.String" -> FieldType.STRING
             "kotlin.Boolean" -> FieldType.BOOLEAN
             "kotlin.Int" -> FieldType.INT
-            else -> null
+            else -> {
+                val decl = resolvedType.declaration
+                if (decl is KSClassDeclaration && decl.classKind == ClassKind.ENUM_CLASS) {
+                    FieldType.ENUM
+                } else null
+            }
         }
     }
 
@@ -154,6 +164,9 @@ internal class SchemaParser(private val logger: KSPLogger) {
                     val max = it.getArg<Int>("max").takeIf { v -> v != Int.MAX_VALUE }
                     result += ValidatorRule.IntRange(order, min, max, it.getArg("message") ?: "Value out of range")
                 }
+            }
+            FieldType.ENUM -> {
+                // No built-in validators for enum fields
             }
         }
 

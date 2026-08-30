@@ -5,6 +5,7 @@ internal enum class FieldType {
     STRING,
     BOOLEAN,
     INT,
+    ENUM,
 }
 
 /** A validator rule captured from an annotation on a property. */
@@ -39,6 +40,7 @@ internal data class FieldModel(
     val hint: String,
     val validators: List<ValidatorRule>,
     val visibleWhen: VisibleWhenRule? = null,
+    val enumFqn: String? = null,
 )
 
 /** Model for an entire @FormSchema class. */
