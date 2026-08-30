@@ -262,7 +262,6 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
                         value = selected.name.lowercase().replaceFirstChar { it.uppercase() },
                         onValueChange = {},
                         readOnly = true,
-                        enabled = false,
                         label = { Text(label) },
                         trailingIcon = { Text("▼") },
                         isError = showError,
