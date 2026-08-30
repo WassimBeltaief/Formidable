@@ -12,8 +12,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -96,9 +98,14 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
                     label = { Text(label) },
                     placeholder = { Text(hint) },
                     isError = showError,
-                    supportingText = if (showError) {
-                        { Text(errorMessage ?: "") }
-                    } else null,
+                    supportingText = when {
+                        isValidating -> {{ Text("Checking availability...") }}
+                        showError -> {{ Text(errorMessage ?: "") }}
+                        else -> null
+                    },
+                    trailingIcon = if (isValidating) {{
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                    }} else null,
                     keyboardOptions = keyboardOptions,
                     keyboardActions = keyboardActions,
                     singleLine = true,

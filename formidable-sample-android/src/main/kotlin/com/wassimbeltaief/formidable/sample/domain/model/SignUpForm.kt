@@ -1,5 +1,6 @@
 package com.wassimbeltaief.formidable.sample.domain.model
 
+import com.wassimbeltaief.formidable.core.schema.AsyncValidation
 import com.wassimbeltaief.formidable.core.schema.Email
 import com.wassimbeltaief.formidable.core.schema.Field
 import com.wassimbeltaief.formidable.core.schema.FormSchema
@@ -9,11 +10,13 @@ import com.wassimbeltaief.formidable.core.schema.NotBlank
 import com.wassimbeltaief.formidable.core.schema.Pattern
 import com.wassimbeltaief.formidable.core.schema.RequiredIf
 import com.wassimbeltaief.formidable.core.schema.VisibleWhen
+import com.wassimbeltaief.formidable.sample.validation.UniqueUsernameValidator
 
 @FormSchema
 data class SignUpForm(
     @Field(label = "Username", hint = "Choose a username")
-    @NotBlank(message = "Username is required")
+    @NotBlank(order = 1, message = "Username is required")
+    @AsyncValidation(UniqueUsernameValidator::class)
     val username: String = "",
 
     @Field(label = "First Name", hint = "Your first name")
