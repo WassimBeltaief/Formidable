@@ -75,6 +75,11 @@ internal class FormStateGenerator {
         }
         FieldType.BOOLEAN -> fieldStateClass.parameterizedBy(BOOLEAN)
         FieldType.INT -> fieldStateClass.parameterizedBy(INT)
+        FieldType.ENUM -> {
+            val enumClass = ClassName.bestGuess(field.enumFqn!!)
+            val enumType = if (field.isNullable) enumClass.copy(nullable = true) else enumClass
+            fieldStateClass.parameterizedBy(enumType)
+        }
     }
 
     private fun buildHolderClass(
@@ -240,6 +245,10 @@ internal class FormStateGenerator {
             FieldType.BOOLEAN -> BOOLEAN
             FieldType.INT -> INT
             FieldType.STRING -> if (field.isNullable) STRING.copy(nullable = true) else STRING
+            FieldType.ENUM -> {
+                val enumClass = ClassName.bestGuess(field.enumFqn!!)
+                if (field.isNullable) enumClass.copy(nullable = true) else enumClass
+            }
         }
 
         val dependentFields = findDependentFields(field.name, schema)
@@ -387,6 +396,14 @@ internal class FormStateGenerator {
                         }
                         FieldType.BOOLEAN -> addStatement("s.copy(value = false, isDirty = false != s.initialValue, errors = emptyList())")
                         FieldType.INT -> addStatement("s.copy(value = 0, isDirty = 0 != s.initialValue, errors = emptyList())")
+                        FieldType.ENUM -> {
+                            val enumClass = ClassName.bestGuess(field.enumFqn!!)
+                            if (field.isNullable) {
+                                addStatement("s.copy(value = null, isDirty = null != s.initialValue, errors = emptyList())")
+                            } else {
+                                addStatement("s.copy(value = %T.entries.first(), isDirty = %T.entries.first() != s.initialValue, errors = emptyList())", enumClass, enumClass)
+                            }
+                        }
                     }
                     endControlFlow()
                 }
