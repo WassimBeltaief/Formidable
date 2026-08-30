@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class MinLengthValidatorTest {
-
     private val validator = MinLengthValidator(min = 3, message = "Too short")
 
     @Test

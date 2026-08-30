@@ -2,6 +2,8 @@ plugins {
     id("com.android.library")
     kotlin("android")
     kotlin("plugin.compose")
+    id("org.jlleitschuh.gradle.ktlint")
+    id("io.gitlab.arturbosch.detekt")
 }
 
 val libs = the<org.gradle.api.artifacts.VersionCatalogsExtension>().named("libs")

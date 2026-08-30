@@ -1,5 +1,8 @@
 plugins {
     kotlin("jvm")
+    id("org.jlleitschuh.gradle.ktlint")
+    id("io.gitlab.arturbosch.detekt")
+    id("org.jetbrains.kotlinx.kover")
 }
 
 kotlin {

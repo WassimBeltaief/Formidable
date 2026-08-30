@@ -1,0 +1,29 @@
+build:
+  maxIssues: 0
+
+complexity:
+  LongMethod:
+    threshold: 60
+  LongParameterList:
+    functionThreshold: 8
+    constructorThreshold: 8
+  TooManyFunctions:
+    thresholdInFiles: 20
+    thresholdInClasses: 15
+
+naming:
+  FunctionNaming:
+    # Allow Composable functions to start with uppercase
+    functionPattern: '[a-zA-Z][a-zA-Z0-9]*'
+
+style:
+  MagicNumber:
+    active: false
+  WildcardImport:
+    active: true
+  ReturnCount:
+    max: 3
+
+exceptions:
+  TooGenericExceptionCaught:
+    active: false

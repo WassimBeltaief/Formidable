@@ -17,7 +17,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.wassimbeltaief.formidable.core.state.FieldState
 
 public class FormScope internal constructor() {
-
     internal val focusRequesters = LinkedHashMap<Any, FocusRequester>()
 
     @Composable
@@ -64,23 +63,29 @@ public class FormScope internal constructor() {
             hint = state.hint,
             showError = state.showError,
             errorMessage = state.errorMessage,
-            modifier = Modifier
-                .focusRequester(requester)
-                .onFocusEvent {
-                    if (it.isFocused) wasFocused = true
-                    else if (wasFocused) onFocusLost()
-                },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number,
-                imeAction = imeAction,
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = {
-                    val values = focusRequesters.values.toList()
-                    val index = values.indexOf(requester)
-                    values.getOrNull(index + 1)?.requestFocus()
-                },
-            ),
+            modifier =
+                Modifier
+                    .focusRequester(requester)
+                    .onFocusEvent {
+                        if (it.isFocused) {
+                            wasFocused = true
+                        } else if (wasFocused) {
+                            onFocusLost()
+                        }
+                    },
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = imeAction,
+                ),
+            keyboardActions =
+                KeyboardActions(
+                    onNext = {
+                        val values = focusRequesters.values.toList()
+                        val index = values.indexOf(requester)
+                        values.getOrNull(index + 1)?.requestFocus()
+                    },
+                ),
         ).content()
     }
 
@@ -113,20 +118,25 @@ public class FormScope internal constructor() {
             isValidating = state.isValidating,
             showError = state.showError,
             errorMessage = state.errorMessage,
-            modifier = Modifier
-                .focusRequester(requester)
-                .onFocusEvent {
-                    if (it.isFocused) wasFocused = true
-                    else if (wasFocused) onFocusLost()
-                },
+            modifier =
+                Modifier
+                    .focusRequester(requester)
+                    .onFocusEvent {
+                        if (it.isFocused) {
+                            wasFocused = true
+                        } else if (wasFocused) {
+                            onFocusLost()
+                        }
+                    },
             keyboardOptions = KeyboardOptions(imeAction = imeAction),
-            keyboardActions = KeyboardActions(
-                onNext = {
-                    val values = focusRequesters.values.toList()
-                    val index = values.indexOf(requester)
-                    values.getOrNull(index + 1)?.requestFocus()
-                },
-            ),
+            keyboardActions =
+                KeyboardActions(
+                    onNext = {
+                        val values = focusRequesters.values.toList()
+                        val index = values.indexOf(requester)
+                        values.getOrNull(index + 1)?.requestFocus()
+                    },
+                ),
         ).content()
     }
 
@@ -159,20 +169,25 @@ public class FormScope internal constructor() {
             isValidating = state.isValidating,
             showError = state.showError,
             errorMessage = state.errorMessage,
-            modifier = Modifier
-                .focusRequester(requester)
-                .onFocusEvent {
-                    if (it.isFocused) wasFocused = true
-                    else if (wasFocused) onFocusLost()
-                },
+            modifier =
+                Modifier
+                    .focusRequester(requester)
+                    .onFocusEvent {
+                        if (it.isFocused) {
+                            wasFocused = true
+                        } else if (wasFocused) {
+                            onFocusLost()
+                        }
+                    },
             keyboardOptions = KeyboardOptions(imeAction = imeAction),
-            keyboardActions = KeyboardActions(
-                onNext = {
-                    val values = focusRequesters.values.toList()
-                    val index = values.indexOf(requester)
-                    values.getOrNull(index + 1)?.requestFocus()
-                },
-            ),
+            keyboardActions =
+                KeyboardActions(
+                    onNext = {
+                        val values = focusRequesters.values.toList()
+                        val index = values.indexOf(requester)
+                        values.getOrNull(index + 1)?.requestFocus()
+                    },
+                ),
         ).content()
     }
 

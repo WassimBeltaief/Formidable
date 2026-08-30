@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class FieldStateTest {
-
     @Test
     fun `isValid is true when errors are empty`() {
         val state = FieldState(value = "hello", initialValue = "hello")

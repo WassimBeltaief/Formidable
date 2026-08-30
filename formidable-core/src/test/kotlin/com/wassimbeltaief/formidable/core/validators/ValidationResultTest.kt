@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class ValidationResultTest {
-
     @Test
     fun `Valid isValid is true`() {
         assertTrue(ValidationResult.Valid.isValid)

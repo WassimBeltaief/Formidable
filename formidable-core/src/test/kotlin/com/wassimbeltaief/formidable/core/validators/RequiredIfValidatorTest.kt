@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class RequiredIfValidatorTest {
-
     @Test
     fun `valid when target field does not match target value`() {
         val validator = RequiredIfValidator("contactMethod", "email", "Email is required")

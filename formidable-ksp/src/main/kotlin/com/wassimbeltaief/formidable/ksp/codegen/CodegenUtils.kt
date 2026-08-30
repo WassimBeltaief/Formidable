@@ -1,4 +1,3 @@
 package com.wassimbeltaief.formidable.ksp.codegen
 
-internal fun String.capitalize(): String =
-    replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+internal fun String.capitalize(): String = replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }

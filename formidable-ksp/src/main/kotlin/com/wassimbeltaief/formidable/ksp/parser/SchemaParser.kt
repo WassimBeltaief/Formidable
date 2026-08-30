@@ -10,16 +10,16 @@ import com.google.devtools.ksp.symbol.KSType
 private const val PKG = "com.wassimbeltaief.formidable.core.schema"
 
 internal class SchemaParser(private val logger: KSPLogger) {
-
     fun parse(classDecl: KSClassDeclaration): SchemaModel? {
         val packageName = classDecl.packageName.asString()
         val className = classDecl.simpleName.asString()
 
         val allProps = classDecl.getAllProperties().toList()
-        val fieldNames = allProps.mapNotNull { prop ->
-            val resolved = prop.type.resolve()
-            if (resolveFieldType(resolved) != null) prop.simpleName.asString() else null
-        }.toSet()
+        val fieldNames =
+            allProps.mapNotNull { prop ->
+                val resolved = prop.type.resolve()
+                if (resolveFieldType(resolved) != null) prop.simpleName.asString() else null
+            }.toSet()
 
         val fields = allProps.mapNotNull { parseField(it, fieldNames) }.toList()
 
@@ -31,7 +31,10 @@ internal class SchemaParser(private val logger: KSPLogger) {
         return SchemaModel(packageName, className, fields)
     }
 
-    private fun parseField(prop: KSPropertyDeclaration, allFieldNames: Set<String>): FieldModel? {
+    private fun parseField(
+        prop: KSPropertyDeclaration,
+        allFieldNames: Set<String>,
+    ): FieldModel? {
         val resolvedType = prop.type.resolve()
         val type = resolveFieldType(resolvedType) ?: return null
         val isNullable = resolvedType.isMarkedNullable
@@ -44,9 +47,12 @@ internal class SchemaParser(private val logger: KSPLogger) {
         val isOptional = fieldAnnotation?.getArg("optional") ?: false
 
         val visibleWhen = parseVisibleWhen(annotations, allFieldNames, prop)
-        val enumFqn = if (type == FieldType.ENUM) {
-            resolvedType.declaration.qualifiedName?.asString()
-        } else null
+        val enumFqn =
+            if (type == FieldType.ENUM) {
+                resolvedType.declaration.qualifiedName?.asString()
+            } else {
+                null
+            }
 
         return FieldModel(
             name = name,
@@ -87,7 +93,9 @@ internal class SchemaParser(private val logger: KSPLogger) {
                 val decl = resolvedType.declaration
                 if (decl is KSClassDeclaration && decl.classKind == ClassKind.ENUM_CLASS) {
                     FieldType.ENUM
-                } else null
+                } else {
+                    null
+                }
             }
         }
     }
@@ -143,9 +151,10 @@ internal class SchemaParser(private val logger: KSPLogger) {
                     result += ValidatorRule.MatchField(order, targetField, it.getArg("message") ?: "Fields do not match")
                 }
                 annotations.findByFqn("$PKG.AsyncValidation")?.let { ann ->
-                    val validatorType = ann.arguments
-                        .firstOrNull { it.name?.asString() == "validator" }
-                        ?.value as? KSType
+                    val validatorType =
+                        ann.arguments
+                            .firstOrNull { it.name?.asString() == "validator" }
+                            ?.value as? KSType
                     validatorType?.declaration?.qualifiedName?.asString()?.let { fqn ->
                         result += ValidatorRule.Async(validatorFqn = fqn)
                     }
@@ -177,6 +186,5 @@ internal class SchemaParser(private val logger: KSPLogger) {
         firstOrNull { it.annotationType.resolve().declaration.qualifiedName?.asString() == fqn }
 
     @Suppress("UNCHECKED_CAST")
-    private fun <T> KSAnnotation.getArg(name: String): T? =
-        arguments.firstOrNull { it.name?.asString() == name }?.value as? T
+    private fun <T> KSAnnotation.getArg(name: String): T? = arguments.firstOrNull { it.name?.asString() == name }?.value as? T
 }

@@ -7,9 +7,15 @@ public class MatchFieldValidator(
     private val targetField: String,
     private val message: String = "Fields do not match",
 ) : FieldValidator<String?> {
-    override fun validate(value: String?, formData: Map<String, Any?>): ValidationResult {
+    override fun validate(
+        value: String?,
+        formData: Map<String, Any?>,
+    ): ValidationResult {
         val targetValue = formData[targetField]?.toString()
-        return if (value == targetValue) ValidationResult.Valid
-        else ValidationResult.Invalid(listOf(message))
+        return if (value == targetValue) {
+            ValidationResult.Valid
+        } else {
+            ValidationResult.Invalid(listOf(message))
+        }
     }
 }

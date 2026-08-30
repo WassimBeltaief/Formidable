@@ -8,12 +8,18 @@ public class RequiredIfValidator(
     private val targetValue: String,
     private val message: String = "This field is required",
 ) : FieldValidator<String?> {
-    override fun validate(value: String?, formData: Map<String, Any?>): ValidationResult {
+    override fun validate(
+        value: String?,
+        formData: Map<String, Any?>,
+    ): ValidationResult {
         val actualTargetValue = formData[targetField]?.toString() ?: ""
         if (actualTargetValue != targetValue) {
             return ValidationResult.Valid
         }
-        return if (!value.isNullOrBlank()) ValidationResult.Valid
-        else ValidationResult.Invalid(listOf(message))
+        return if (!value.isNullOrBlank()) {
+            ValidationResult.Valid
+        } else {
+            ValidationResult.Invalid(listOf(message))
+        }
     }
 }

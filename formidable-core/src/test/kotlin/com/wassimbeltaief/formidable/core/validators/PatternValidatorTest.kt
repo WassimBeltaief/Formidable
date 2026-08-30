@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class PatternValidatorTest {
-
     @Test
     fun `matching pattern passes`() {
         val validator = PatternValidator("^[A-Z]{3}$")

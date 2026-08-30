@@ -9,7 +9,13 @@ public class PatternValidator(
 ) : FieldValidator<String?> {
     private val pattern = Regex(regex)
 
-    override fun validate(value: String?, formData: Map<String, Any?>): ValidationResult =
-        if (value.isNullOrEmpty() || pattern.matches(value)) ValidationResult.Valid
-        else ValidationResult.Invalid(listOf(message))
+    override fun validate(
+        value: String?,
+        formData: Map<String, Any?>,
+    ): ValidationResult =
+        if (value.isNullOrEmpty() || pattern.matches(value)) {
+            ValidationResult.Valid
+        } else {
+            ValidationResult.Invalid(listOf(message))
+        }
 }

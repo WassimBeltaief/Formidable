@@ -7,8 +7,15 @@ public interface FormController<T : Any> {
     public val data: T
     public val status: StateFlow<FormStatus>
     public val isValid: StateFlow<Boolean>
+
     public fun validateAllSync(): Boolean
+
     public fun reset()
+
     public fun clear()
-    public fun setFieldError(field: String, error: String)
+
+    public fun setFieldError(
+        field: String,
+        error: String,
+    )
 }

@@ -9,11 +9,9 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class FormStateGeneratorTest {
-
     private val generator = FormStateGenerator()
 
-    private fun generate(vararg fields: FieldModel): String =
-        generator.generate(SchemaModel("com.example", "LoginForm", fields.toList())).toString()
+    private fun generate(vararg fields: FieldModel): String = generator.generate(SchemaModel("com.example", "LoginForm", fields.toList())).toString()
 
     // --- generated file ---
 
@@ -198,7 +196,10 @@ class FormStateGeneratorTest {
         assertTrue(afterClear.contains("value = \"\""))
     }
 
-    private fun stringField(name: String, vararg validators: ValidatorRule) = FieldModel(
+    private fun stringField(
+        name: String,
+        vararg validators: ValidatorRule,
+    ) = FieldModel(
         name = name,
         type = FieldType.STRING,
         isNullable = false,
@@ -208,7 +209,10 @@ class FormStateGeneratorTest {
         validators = validators.toList(),
     )
 
-    private fun nullableStringField(name: String, vararg validators: ValidatorRule) = FieldModel(
+    private fun nullableStringField(
+        name: String,
+        vararg validators: ValidatorRule,
+    ) = FieldModel(
         name = name,
         type = FieldType.STRING,
         isNullable = true,

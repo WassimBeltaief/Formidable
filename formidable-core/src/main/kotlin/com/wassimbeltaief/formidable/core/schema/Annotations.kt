@@ -96,4 +96,3 @@ public annotation class MatchField(
 @Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.SOURCE)
 public annotation class AsyncValidation(val validator: KClass<out AsyncFieldValidator<*>>)
-

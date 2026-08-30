@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class MaxLengthValidatorTest {
-
     @Test
     fun `valid when string length is under max`() {
         val validator = MaxLengthValidator(10)

@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class IntRangeValidatorTest {
-
     @Test
     fun `value within range returns Valid`() {
         assertEquals(ValidationResult.Valid, IntRangeValidator(min = 18, max = 120).validate(25))

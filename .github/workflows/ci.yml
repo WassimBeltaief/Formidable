@@ -27,11 +27,17 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Check code style
+        run: ./gradlew ktlintCheck
+
+      - name: Run static analysis
+        run: ./gradlew detekt
+
       - name: Build core modules
         run: ./gradlew :formidable-core:build :formidable-ksp:build :formidable-compose:build -x lint -x lintAnalyzeDebug -x lintAnalyzeDebugAndroidTest
 
-      - name: Run tests
-        run: ./gradlew test
+      - name: Run tests with coverage
+        run: ./gradlew test koverXmlReport
 
       - name: Build sample app
-        run: ./gradlew :formidable-sample-android:assembleDebug
+        run: ./gradlew :formidable-sample-android:assembleDebug -x lint

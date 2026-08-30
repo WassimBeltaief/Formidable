@@ -16,14 +16,14 @@ internal class FormidableProcessor(
     private val codeGenerator: CodeGenerator,
     private val logger: KSPLogger,
 ) : SymbolProcessor {
-
     private val parser = SchemaParser(logger)
     private val stateGenerator = FormStateGenerator()
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        val annotated = resolver
-            .getSymbolsWithAnnotation("com.wassimbeltaief.formidable.core.schema.FormSchema")
-            .toList()
+        val annotated =
+            resolver
+                .getSymbolsWithAnnotation("com.wassimbeltaief.formidable.core.schema.FormSchema")
+                .toList()
 
         val deferred = annotated.filter { !it.validate() }
 

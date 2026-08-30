@@ -8,10 +8,16 @@ public class IntRangeValidator(
     private val max: Int? = null,
     private val message: String = "Value out of range",
 ) : FieldValidator<Int> {
-    override fun validate(value: Int, formData: Map<String, Any?>): ValidationResult {
+    override fun validate(
+        value: Int,
+        formData: Map<String, Any?>,
+    ): ValidationResult {
         val belowMin = min != null && value < min
         val aboveMax = max != null && value > max
-        return if (belowMin || aboveMax) ValidationResult.Invalid(listOf(message))
-        else ValidationResult.Valid
+        return if (belowMin || aboveMax) {
+            ValidationResult.Invalid(listOf(message))
+        } else {
+            ValidationResult.Valid
+        }
     }
 }

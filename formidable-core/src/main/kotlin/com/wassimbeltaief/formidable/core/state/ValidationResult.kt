@@ -2,7 +2,9 @@ package com.wassimbeltaief.formidable.core.state
 
 public sealed class ValidationResult {
     public object Valid : ValidationResult()
+
     public data class Invalid(val errors: List<String>) : ValidationResult()
+
     public object Pending : ValidationResult()
 
     public val isValid: Boolean get() = this is Valid

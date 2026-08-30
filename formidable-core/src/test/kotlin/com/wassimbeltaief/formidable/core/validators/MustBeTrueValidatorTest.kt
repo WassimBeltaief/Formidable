@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class MustBeTrueValidatorTest {
-
     @Test
     fun `true returns Valid`() {
         assertEquals(ValidationResult.Valid, MustBeTrueValidator().validate(true))

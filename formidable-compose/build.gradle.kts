@@ -14,10 +14,13 @@ android {
     }
 
     kotlinOptions {
-        freeCompilerArgs += listOf(
-            "-P", "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=${project.buildDir}/compose_reports",
-            "-P", "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=${project.buildDir}/compose_reports",
-        )
+        freeCompilerArgs +=
+            listOf(
+                "-P",
+                "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=${project.buildDir}/compose_reports",
+                "-P",
+                "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=${project.buildDir}/compose_reports",
+            )
     }
 }
 
@@ -35,5 +38,4 @@ dependencies {
     androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(libs.espresso.core)
     debugImplementation(libs.compose.ui.test.manifest)
-
 }

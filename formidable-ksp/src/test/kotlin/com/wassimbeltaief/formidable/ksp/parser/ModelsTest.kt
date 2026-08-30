@@ -4,18 +4,18 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class ModelsTest {
-
     @Test
     fun `FieldModel stores all properties correctly`() {
-        val field = FieldModel(
-            name = "email",
-            type = FieldType.STRING,
-            isNullable = false,
-            isOptional = false,
-            label = "Email address",
-            hint = "you@example.com",
-            validators = listOf(ValidatorRule.NotBlank(0, "Required")),
-        )
+        val field =
+            FieldModel(
+                name = "email",
+                type = FieldType.STRING,
+                isNullable = false,
+                isOptional = false,
+                label = "Email address",
+                hint = "you@example.com",
+                validators = listOf(ValidatorRule.NotBlank(0, "Required")),
+            )
 
         assertEquals("email", field.name)
         assertEquals(FieldType.STRING, field.type)
@@ -28,15 +28,16 @@ class ModelsTest {
 
     @Test
     fun `FieldModel supports nullable and optional flags`() {
-        val field = FieldModel(
-            name = "nickname",
-            type = FieldType.STRING,
-            isNullable = true,
-            isOptional = true,
-            label = "Nickname",
-            hint = "Optional",
-            validators = emptyList(),
-        )
+        val field =
+            FieldModel(
+                name = "nickname",
+                type = FieldType.STRING,
+                isNullable = true,
+                isOptional = true,
+                label = "Nickname",
+                hint = "Optional",
+                validators = emptyList(),
+            )
 
         assertEquals(true, field.isNullable)
         assertEquals(true, field.isOptional)

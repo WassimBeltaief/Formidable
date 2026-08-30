@@ -7,7 +7,13 @@ public class MaxLengthValidator(
     private val max: Int,
     private val message: String = "Must be at most $max characters",
 ) : FieldValidator<String> {
-    override fun validate(value: String, formData: Map<String, Any?>): ValidationResult =
-        if (value.length <= max) ValidationResult.Valid
-        else ValidationResult.Invalid(listOf(message))
+    override fun validate(
+        value: String,
+        formData: Map<String, Any?>,
+    ): ValidationResult =
+        if (value.length <= max) {
+            ValidationResult.Valid
+        } else {
+            ValidationResult.Invalid(listOf(message))
+        }
 }
