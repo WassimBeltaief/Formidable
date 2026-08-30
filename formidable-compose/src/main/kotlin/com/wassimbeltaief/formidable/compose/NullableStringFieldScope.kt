@@ -11,6 +11,7 @@ public class NullableStringFieldScope internal constructor(
     public val label: String,
     public val hint: String,
     public val isOptional: Boolean,
+    public val isValidating: Boolean,
     public val showError: Boolean,
     public val errorMessage: String?,
     public val modifier: Modifier,

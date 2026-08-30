@@ -110,6 +110,7 @@ public class FormScope internal constructor() {
             label = state.label,
             hint = state.hint,
             isOptional = state.isOptional,
+            isValidating = state.isValidating,
             showError = state.showError,
             errorMessage = state.errorMessage,
             modifier = Modifier
@@ -155,6 +156,7 @@ public class FormScope internal constructor() {
             label = state.label,
             hint = state.hint,
             isOptional = state.isOptional,
+            isValidating = state.isValidating,
             showError = state.showError,
             errorMessage = state.errorMessage,
             modifier = Modifier
