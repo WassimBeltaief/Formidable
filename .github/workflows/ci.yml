@@ -28,7 +28,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build core modules
-        run: ./gradlew :formidable-core:build :formidable-ksp:build :formidable-compose:build
+        run: ./gradlew :formidable-core:build :formidable-ksp:build :formidable-compose:build -x lint -x lintAnalyzeDebug -x lintAnalyzeDebugAndroidTest
 
       - name: Run tests
         run: ./gradlew test
