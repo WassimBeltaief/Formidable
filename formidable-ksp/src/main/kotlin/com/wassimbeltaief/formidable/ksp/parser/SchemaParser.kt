@@ -124,6 +124,14 @@ internal class SchemaParser(private val logger: KSPLogger) {
                     }
                     result += ValidatorRule.RequiredIf(order, targetField, targetValue, it.getArg("message") ?: "This field is required")
                 }
+                annotations.findByFqn("$PKG.MatchField")?.let {
+                    val order = it.getArg<Int>("order") ?: 0
+                    val targetField = it.getArg<String>("targetField") ?: ""
+                    if (targetField !in allFieldNames) {
+                        logger.error("@MatchField targetField '$targetField' does not exist in this form", prop)
+                    }
+                    result += ValidatorRule.MatchField(order, targetField, it.getArg("message") ?: "Fields do not match")
+                }
                 annotations.findByFqn("$PKG.AsyncValidation")?.let { ann ->
                     val validatorType = ann.arguments
                         .firstOrNull { it.name?.asString() == "validator" }

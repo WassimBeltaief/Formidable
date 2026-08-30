@@ -17,6 +17,7 @@ internal sealed class ValidatorRule {
     data class Email(override val order: Int, val message: String) : ValidatorRule()
     data class Pattern(override val order: Int, val regex: String, val message: String) : ValidatorRule()
     data class RequiredIf(override val order: Int, val targetField: String, val targetValue: String, val message: String) : ValidatorRule()
+    data class MatchField(override val order: Int, val targetField: String, val message: String) : ValidatorRule()
     data class Async(override val order: Int = Int.MAX_VALUE, val validatorFqn: String) : ValidatorRule()
     data class MustBeTrue(override val order: Int, val message: String) : ValidatorRule()
     data class IntRange(override val order: Int, val min: Int?, val max: Int?, val message: String) : ValidatorRule()

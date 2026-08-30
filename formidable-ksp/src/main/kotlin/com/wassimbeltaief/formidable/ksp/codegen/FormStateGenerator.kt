@@ -32,6 +32,7 @@ private val maxLengthValidatorClass = ClassName("com.wassimbeltaief.formidable.c
 private val emailValidatorClass = ClassName("com.wassimbeltaief.formidable.core.validation.builtin", "EmailValidator")
 private val patternValidatorClass = ClassName("com.wassimbeltaief.formidable.core.validation.builtin", "PatternValidator")
 private val requiredIfValidatorClass = ClassName("com.wassimbeltaief.formidable.core.validation.builtin", "RequiredIfValidator")
+private val matchFieldValidatorClass = ClassName("com.wassimbeltaief.formidable.core.validation.builtin", "MatchFieldValidator")
 private val mustBeTrueValidatorClass = ClassName("com.wassimbeltaief.formidable.core.validation.builtin", "MustBeTrueValidator")
 private val intRangeValidatorClass = ClassName("com.wassimbeltaief.formidable.core.validation.builtin", "IntRangeValidator")
 private val validationResultClass = ClassName("com.wassimbeltaief.formidable.core.state", "ValidationResult")
@@ -431,7 +432,7 @@ internal class FormStateGenerator {
     }
 
     private fun hasCrossFieldValidators(validators: List<ValidatorRule>): Boolean =
-        validators.any { it is ValidatorRule.RequiredIf }
+        validators.any { it is ValidatorRule.RequiredIf || it is ValidatorRule.MatchField }
 
     private fun validatorConstructor(rule: ValidatorRule): CodeBlock = buildCodeBlock {
         when (rule) {
@@ -441,6 +442,7 @@ internal class FormStateGenerator {
             is ValidatorRule.Email -> add("%T(%S)", emailValidatorClass, rule.message)
             is ValidatorRule.Pattern -> add("%T(%S, %S)", patternValidatorClass, rule.regex, rule.message)
             is ValidatorRule.RequiredIf -> add("%T(%S, %S, %S)", requiredIfValidatorClass, rule.targetField, rule.targetValue, rule.message)
+            is ValidatorRule.MatchField -> add("%T(%S, %S)", matchFieldValidatorClass, rule.targetField, rule.message)
             is ValidatorRule.MustBeTrue -> add("%T(%S)", mustBeTrueValidatorClass, rule.message)
             is ValidatorRule.IntRange -> {
                 val minArg = if (rule.min != null) "%L" else "null"
@@ -470,8 +472,11 @@ internal class FormStateGenerator {
             val hasRequiredIfDep = field.validators.any {
                 it is ValidatorRule.RequiredIf && it.targetField == targetFieldName
             }
+            val hasMatchFieldDep = field.validators.any {
+                it is ValidatorRule.MatchField && it.targetField == targetFieldName
+            }
             val hasVisibleWhenDep = field.visibleWhen?.targetField == targetFieldName
-            hasRequiredIfDep || hasVisibleWhenDep
+            hasRequiredIfDep || hasMatchFieldDep || hasVisibleWhenDep
         }
     }
 
