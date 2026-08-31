@@ -1,17 +1,25 @@
 package com.wassimbeltaief.formidable.sample.ui.signup
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -54,33 +62,45 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
     val isFormValid by viewModel.controller.isValid.collectAsState()
 
     if (submitted) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 32.dp, vertical = 64.dp),
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.TopCenter,
         ) {
-            Text(
-                text = "Welcome,\n${viewModel.controller.data.firstName}.",
-                style = MaterialTheme.typography.displaySmall,
-            )
-            Spacer(Modifier.height(12.dp))
-            Text(
-                text = "Your account has been created.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Column(
+                modifier =
+                    Modifier
+                        .widthIn(max = 480.dp)
+                        .fillMaxWidth()
+                        .padding(horizontal = 32.dp, vertical = 64.dp),
+            ) {
+                Text(
+                    text = "Welcome,\n${viewModel.controller.data.firstName}.",
+                    style = MaterialTheme.typography.displaySmall,
+                )
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = "Your account has been created.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
         return
     }
 
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 32.dp, vertical = 64.dp),
-    ) {
+    val scrollState = rememberScrollState()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
+            contentAlignment = Alignment.TopCenter,
+        ) {
+            Column(
+                modifier =
+                    Modifier
+                        .widthIn(max = 480.dp)
+                        .fillMaxWidth()
+                        .padding(horizontal = 32.dp, vertical = 64.dp),
+            ) {
         Text(
             text = "Create account",
             style = MaterialTheme.typography.displaySmall,
@@ -404,13 +424,40 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
             }
         }
 
-        Spacer(Modifier.height(32.dp))
-        Button(
-            onClick = { viewModel.submitForm() },
-            enabled = isFormValid,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text("Create account")
+                Spacer(Modifier.height(32.dp))
+                Button(
+                    onClick = { viewModel.submitForm() },
+                    enabled = isFormValid,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text("Create account")
+                }
+            }
         }
+        ScrollbarThumb(scrollState, Modifier.align(Alignment.CenterEnd))
+    }
+}
+
+@Composable
+private fun ScrollbarThumb(
+    scrollState: ScrollState,
+    modifier: Modifier = Modifier,
+) {
+    if (scrollState.maxValue <= 0) return
+    BoxWithConstraints(modifier = modifier.fillMaxHeight().width(6.dp)) {
+        val totalPx = constraints.maxHeight + scrollState.maxValue
+        val thumbFraction = constraints.maxHeight.toFloat() / totalPx
+        val thumbOffset = maxHeight * (scrollState.value.toFloat() / totalPx)
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(thumbFraction)
+                    .offset(y = thumbOffset)
+                    .background(
+                        MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+                        RoundedCornerShape(3.dp),
+                    ),
+        )
     }
 }
