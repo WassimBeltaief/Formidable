@@ -1,41 +1,31 @@
 plugins {
-    id("formidable.android-library-published")
+    id("formidable.cmp-library-published")
 }
 
 android {
     namespace = "com.wassimbeltaief.formidable.compose"
-
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
     lint {
         disable += setOf("RememberInComposition", "FrequentlyChangingValue")
     }
+}
 
-    kotlinOptions {
-        freeCompilerArgs +=
-            listOf(
-                "-P",
-                "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=${project.buildDir}/compose_reports",
-                "-P",
-                "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=${project.buildDir}/compose_reports",
-            )
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":formidable-core"))
+        }
     }
 }
 
 dependencies {
-    implementation(project(":formidable-core"))
-    implementation(platform(libs.compose.bom))
-    implementation(libs.compose.ui)
-    implementation(libs.compose.foundation)
-    implementation(libs.compose.runtime)
-
-    androidTestImplementation(platform(libs.compose.bom))
-    androidTestImplementation(libs.compose.ui.test.junit4)
-    androidTestImplementation(libs.androidx.test.runner)
-    androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.androidx.test.rules)
-    androidTestImplementation(libs.espresso.core)
-    debugImplementation(libs.compose.ui.test.manifest)
+    "androidTestImplementation"(platform(libs.compose.bom))
+    "androidTestImplementation"(libs.compose.ui.test.junit4)
+    "androidTestImplementation"(libs.androidx.test.runner)
+    "androidTestImplementation"(libs.androidx.test.ext.junit)
+    "androidTestImplementation"(libs.androidx.test.rules)
+    "androidTestImplementation"(libs.espresso.core)
+    "debugImplementation"(libs.compose.ui.test.manifest)
 }

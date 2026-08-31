@@ -1,9 +1,9 @@
 package com.wassimbeltaief.formidable.core.validators
 
 import com.wassimbeltaief.formidable.core.validation.builtin.MatchFieldValidator
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class MatchFieldValidatorTest {
     @Test

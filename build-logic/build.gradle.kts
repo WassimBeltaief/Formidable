@@ -13,4 +13,5 @@ dependencies {
     implementation(libs.ktlint.gradlePlugin)
     implementation(libs.detekt.gradlePlugin)
     implementation(libs.kover.gradlePlugin)
+    implementation(libs.compose.multiplatform.gradlePlugin)
 }

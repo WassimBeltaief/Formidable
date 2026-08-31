@@ -3,9 +3,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![CI](https://github.com/WassimBeltaief/formidable/actions/workflows/ci.yml/badge.svg)](https://github.com/WassimBeltaief/formidable/actions/workflows/ci.yml)
 
-> Headless, schema-driven form engine for Jetpack Compose
+> Headless, schema-driven form engine for Compose Multiplatform
 
-Formidable is a Kotlin library that generates type-safe form controllers from annotated data classes. Define your form schema once, get validation, state management, and Compose integration for free.
+Formidable is a Kotlin Multiplatform library that generates type-safe form controllers from annotated data classes. Define your form schema once, get validation, state management, and Compose integration for free — on Android, iOS, and Web.
 
 ## Highlights
 
@@ -13,13 +13,17 @@ Formidable is a Kotlin library that generates type-safe form controllers from an
 - **Type-safe** — Generated controllers with strongly-typed field access
 - **Headless** — You own the UI, Formidable handles the state
 - **Validation** — Sync, async, and cross-field validation out of the box
-- **Compose-first** — Built for Jetpack Compose with focus management and keyboard navigation
+- **Multiplatform** — Android, iOS, and WASM (Web) via Compose Multiplatform
+
+## Try it live
+
+> 🌐 **[formidable.wassimbeltaief.dev](https://wassimbeltaief.github.io/Formidable/)** — interactive demo running in the browser
 
 ## Requirements
 
-- Android SDK 24+
-- Kotlin 1.9+
-- Jetpack Compose 1.5+
+- Kotlin 2.0+
+- Compose Multiplatform 1.8+
+- Android SDK 24+ (for Android target)
 
 ## Installation
 
@@ -27,13 +31,31 @@ Add the dependencies to your module's `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("com.google.devtools.ksp") version "1.9.22-1.0.17"
+    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
+}
+
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation("com.wassimbeltaief.formidable:formidable-core:2.0.0")
+            implementation("com.wassimbeltaief.formidable:formidable-compose:2.0.0")
+        }
+    }
 }
 
 dependencies {
-    implementation("com.wassimbeltaief.formidable:formidable-core:<version>")
-    implementation("com.wassimbeltaief.formidable:formidable-compose:<version>")
-    ksp("com.wassimbeltaief.formidable:formidable-ksp:<version>")
+    // KSP processes @FormSchema in commonMain, generates Controller for all targets
+    add("kspCommonMainMetadata", "com.wassimbeltaief.formidable:formidable-ksp:2.0.0")
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
+    if (name != "kspCommonMainKotlinMetadata") {
+        dependsOn("kspCommonMainKotlinMetadata")
+    }
+}
+
+kotlin.sourceSets.commonMain {
+    kotlin.srcDir(layout.buildDirectory.dir("generated/ksp/metadata/commonMain/kotlin"))
 }
 ```
 
