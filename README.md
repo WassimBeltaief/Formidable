@@ -559,24 +559,28 @@ Three annotations work together here:
 - **`@RequiredIf(order = 1, ...)`** — when visible, the field must not be empty. The `order` parameter controls which validator runs first within this field.
 - **`@Pattern(order = 2, ...)`** — once the presence check passes, the format is validated. Running it second means the user sees "Phone is required" before "invalid format" on an empty field.
 
-In the UI, use `ConditionalField` instead of `Field` — it renders nothing (and skips focus registration) when `isVisible = false`:
+In the UI, wrap the field in `AnimatedVisibility` using `isVisible` from the field state:
 
 ```kotlin
-ConditionalField(
-    state = phoneState,
-    onValueChange = { controller.updatePhone(it) },
-    onFocusLost = { controller.touchPhone() },
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(label) },
-        isError = showError,
-        supportingText = if (showError) { { Text(errorMessage ?: "") } } else null,
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
-        modifier = modifier.fillMaxWidth(),
-    )
+val phoneState by controller.phone.collectAsState()
+
+AnimatedVisibility(visible = phoneState.isVisible) {
+    NullableStringField(
+        state = phoneState,
+        onValueChange = { controller.updatePhone(it) },
+        onFocusLost = { controller.touchPhone() },
+    ) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(label) },
+            isError = showError,
+            supportingText = if (showError) { { Text(errorMessage ?: "") } } else null,
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            modifier = modifier.fillMaxWidth(),
+        )
+    }
 }
 ```
 
