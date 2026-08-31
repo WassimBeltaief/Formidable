@@ -7,19 +7,20 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![CI](https://github.com/WassimBeltaief/Formidable/actions/workflows/ci.yml/badge.svg)](https://github.com/WassimBeltaief/Formidable/actions/workflows/ci.yml)
 
-Formidable generates type-safe form controllers from annotated kotlin data classes. Define your form once — get state management, validation, and Compose integration on Android, iOS, and Web.
+Formidable generates type-safe form controllers from annotated Kotlin data classes. Define your form once — get state management, validation, and Compose integration on Android, iOS, and Web.
 
 ## Highlights
 
 - **KSP-powered** — No runtime reflection, all code generated at compile time
 - **Type-safe** — Generated controllers with strongly-typed field access
 - **Headless** — You own the UI, Formidable handles the state
+- **Auto-rendering** — Optional M3 rendering with a config DSL, no boilerplate
 - **Validation** — Sync, async, and cross-field validation out of the box
 - **Multiplatform** — Android, iOS, and WASM via Compose Multiplatform
 
 ## Try it live
 
-> 🌐 **[wassimbeltaief.github.io/Formidable](https://wassimbeltaief.github.io/Formidable/)** — interactive demo running in the browser
+> **[wassimbeltaief.github.io/Formidable](https://wassimbeltaief.github.io/Formidable/)** — interactive demo running in the browser
 
 ---
 
@@ -58,6 +59,7 @@ class LoginViewModel : ViewModel() {
 @Composable
 fun LoginScreen(viewModel: LoginViewModel) {
     val emailState by viewModel.controller.email.collectAsState()
+    val passwordState by viewModel.controller.password.collectAsState()
     val isValid by viewModel.controller.isValid.collectAsState()
 
     Formidable {
@@ -65,19 +67,16 @@ fun LoginScreen(viewModel: LoginViewModel) {
             state = emailState,
             onValueChange = { viewModel.controller.updateEmail(it) },
             onFocusLost = { viewModel.controller.touchEmail() },
-        ) {
-            OutlinedTextField(
-                value = value,
-                onValueChange = onValueChange,
-                label = { Text(label) },
-                isError = showError,
-                supportingText = if (showError) { { Text(errorMessage ?: "") } } else null,
-                keyboardOptions = keyboardOptions,
-                keyboardActions = keyboardActions,
-                modifier = modifier.fillMaxWidth(),
-            )
-        }
-
+        )
+        StringField(
+            state = passwordState,
+            onValueChange = { viewModel.controller.updatePassword(it) },
+            onFocusLost = { viewModel.controller.touchPassword() },
+            config = {
+                visualTransformation = PasswordVisualTransformation()
+                keyboardType = KeyboardType.Password
+            },
+        )
         Button(onClick = { /* submit */ }, enabled = isValid) {
             Text("Login")
         }
@@ -85,7 +84,76 @@ fun LoginScreen(viewModel: LoginViewModel) {
 }
 ```
 
-You get validation, error display, focus management, and keyboard navigation for free.
+Formidable renders `OutlinedTextField` for you, auto-wires focus, keyboard navigation, and error display. Need a different style or a password field? Use `config = { ... }`. Need full control? Pass a trailing lambda instead.
+
+---
+
+## Rendering modes
+
+Every field function supports three call forms that coexist cleanly.
+
+### Auto-render (default)
+
+```kotlin
+StringField(
+    state = emailState,
+    onValueChange = { controller.updateEmail(it) },
+    onFocusLost = { controller.touchEmail() },
+)
+```
+
+Renders an `OutlinedTextField` with label, hint, error message, and a spinner when async validation is running. Zero boilerplate.
+
+### Config override
+
+```kotlin
+StringField(
+    state = passwordState,
+    onValueChange = { controller.updatePassword(it) },
+    onFocusLost = { controller.touchPassword() },
+    config = {
+        style = FieldStyle.Text.Filled
+        keyboardType = KeyboardType.Password
+        visualTransformation = PasswordVisualTransformation()
+        trailingIcon = { Icon(Icons.Default.Lock, contentDescription = null) }
+    },
+)
+```
+
+Keeps auto-rendering but lets you override individual slots. The `config` builder exposes: `style`, `keyboardType`, `supportingText`, `trailingIcon`, `leadingIcon`, `visualTransformation`, `singleLine`.
+
+The config must be passed as a **named argument** (`config = { ... }`), not as a trailing lambda. This is intentional — Kotlin uses the presence of a trailing lambda to dispatch to the headless API instead.
+
+**Available styles:**
+
+| Field type | Default | Other options |
+|---|---|---|
+| `StringField` / `IntField` | `FieldStyle.Text.Outlined` | `FieldStyle.Text.Filled` |
+| `BooleanField` | `FieldStyle.Toggle.CheckboxRow` | `Checkbox`, `Switch`, `SwitchRow` |
+| `EnumField` | `FieldStyle.Picker.Dropdown` | `RadioGroup`, `SegmentedButton` |
+
+### Headless (trailing lambda)
+
+```kotlin
+StringField(
+    state = emailState,
+    onValueChange = { controller.updateEmail(it) },
+    onFocusLost = { controller.touchEmail() },
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier.fillMaxWidth(),
+        label = { Text(label) },
+        isError = showError,
+        supportingText = if (showError) { { Text(errorMessage ?: "") } } else null,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+    )
+}
+```
+
+The trailing lambda receives a `StringFieldScope` with all state properties. You own every pixel. No Material3 dependency is used.
 
 ---
 
@@ -225,7 +293,7 @@ data class FieldState<T>(
 
 #### isValid
 
-`isValid` is a `StateFlow<Boolean>` that recomputes whenever any field changes. It's `true` only when every visible, non-optional field passes all its validators.
+`isValid` is a `StateFlow<Boolean>` that recomputes whenever any field changes. It is `true` only when every visible, non-optional field passes all its validators.
 
 #### validateAllSync / submit pattern
 
@@ -256,11 +324,11 @@ Wrap your fields in `Formidable {}`. It wires up focus management, keyboard navi
 ```kotlin
 @Composable
 fun SignUpScreen(viewModel: SignUpViewModel) {
-    Formidable(state = viewModel.controller) {
+    Formidable {
         // Fields declared here are registered in focus order
-        StringField(...) { /* your OutlinedTextField */ }
-        IntField(...)    { /* your OutlinedTextField */ }
-        BooleanField(...)  { /* your Checkbox row */ }
+        StringField(state = usernameState, ...)
+        IntField(state = ageState, ...)
+        BooleanField(state = acceptTermsState, ...)
 
         Button(onClick = { viewModel.controller.validateAllSync() }) {
             Text("Sign up")
@@ -269,13 +337,13 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
 }
 ```
 
-Each `*Field` lambda receives a `FieldScope` — a set of pre-computed properties you plug directly into your UI component.
+Fields are registered in declaration order. The last field gets `ImeAction.Done`; all others get `ImeAction.Next` and automatically advance focus on the Next keyboard action.
 
 ---
 
 ### 4. FieldScope — What You Get Inside a Field
 
-Every field lambda receives a typed `FieldScope`. You don't call any functions — just read the properties and pass them to your composable.
+When using the headless trailing-lambda API, the lambda receives a typed `FieldScope`. You don't call any functions — just read the properties and pass them to your composable.
 
 | Property | Type | Description |
 |---|---|---|
@@ -328,6 +396,18 @@ data class LoginForm(
 )
 ```
 
+**Auto-render:**
+
+```kotlin
+StringField(
+    state = emailState,
+    onValueChange = { controller.updateEmail(it) },
+    onFocusLost = { controller.touchEmail() },
+)
+```
+
+**Headless (full control):**
+
 ```kotlin
 StringField(
     state = emailState,
@@ -358,6 +438,29 @@ StringField(
 val acceptTerms: Boolean = false,
 ```
 
+**Auto-render** (renders a `CheckboxRow` by default):
+
+```kotlin
+BooleanField(
+    state = acceptTermsState,
+    onCheckedChange = { controller.updateAcceptTerms(it) },
+    onFocusLost = { controller.touchAcceptTerms() },
+)
+```
+
+**With style override:**
+
+```kotlin
+BooleanField(
+    state = acceptTermsState,
+    onCheckedChange = { controller.updateAcceptTerms(it) },
+    onFocusLost = { controller.touchAcceptTerms() },
+    config = { style = FieldStyle.Toggle.SwitchRow },
+)
+```
+
+**Headless (full control):**
+
 ```kotlin
 BooleanField(
     state = acceptTermsState,
@@ -366,7 +469,7 @@ BooleanField(
 ) {
     Column(modifier = modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(checked = value, onCheckedChange = onValueChange)
+            Checkbox(checked = checked, onCheckedChange = onCheckedChange)
             Text(label)
         }
         if (showError) {
@@ -385,6 +488,18 @@ BooleanField(
 @IntRange(min = 18, max = 120, message = "Must be between 18 and 120")
 val age: Int = 0,
 ```
+
+**Auto-render** (numeric keyboard auto-configured):
+
+```kotlin
+IntField(
+    state = ageState,
+    onValueChange = { controller.updateAge(it) },
+    onFocusLost = { controller.touchAge() },
+)
+```
+
+**Headless (full control):**
 
 ```kotlin
 IntField(
@@ -416,6 +531,18 @@ Use `String?` for fields that are truly optional. `NullableStringField` emits `n
 val nickname: String? = null,
 ```
 
+**Auto-render:**
+
+```kotlin
+NullableStringField(
+    state = nicknameState,
+    onValueChange = { controller.updateNickname(it) },
+    onFocusLost = { controller.touchNickname() },
+)
+```
+
+**Headless (full control):**
+
 ```kotlin
 NullableStringField(
     state = nicknameState,
@@ -443,6 +570,29 @@ enum class ContactMethod { EMAIL, PHONE, SMS }
 @Field(label = "Preferred contact")
 val contactMethod: ContactMethod = ContactMethod.EMAIL,
 ```
+
+**Auto-render** (renders an `ExposedDropdownMenuBox` by default):
+
+```kotlin
+EnumField(
+    state = contactMethodState,
+    options = ContactMethod.entries,
+    onSelect = { controller.updateContactMethod(it) },
+)
+```
+
+**With style override:**
+
+```kotlin
+EnumField(
+    state = contactMethodState,
+    options = ContactMethod.entries,
+    onSelect = { controller.updateContactMethod(it) },
+    config = { style = FieldStyle.Picker.RadioGroup },
+)
+```
+
+**Headless (full control):**
 
 ```kotlin
 EnumField(
@@ -481,7 +631,29 @@ class UniqueUsernameValidator : AsyncFieldValidator<String> {
 }
 ```
 
-While validating, `isValidating = true` is emitted on the field's state. Use it to show a loading indicator:
+While validating, `isValidating = true` is emitted on the field's state. The auto-render overload handles this automatically — it shows a `CircularProgressIndicator` as the trailing icon and displays "Checking…" in the supporting text.
+
+To customize those messages, pass slot overrides via `config`. Note that `usernameState` is read from the outer composable scope (via `collectAsState()`), not from inside the config lambda — the config is not composable, it just stores composable lambda values that are called later during rendering.
+
+```kotlin
+StringField(
+    state = usernameState,
+    onValueChange = { controller.updateUsername(it) },
+    onFocusLost = { controller.touchUsername() },
+    config = {
+        supportingText = when {
+            usernameState.isValidating -> { { Text("Checking availability…") } }
+            usernameState.showError -> { { Text(usernameState.errorMessage ?: "") } }
+            else -> null
+        }
+        trailingIcon = if (usernameState.isValidating) {
+            { CircularProgressIndicator(Modifier.size(20.dp)) }
+        } else null
+    },
+)
+```
+
+Or use the headless API when you need full rendering control:
 
 ```kotlin
 StringField(state = usernameState, ...) {
@@ -522,6 +694,29 @@ data class SignUpForm(
 ```
 
 No extra code needed in the UI — the generated controller validates `confirmPassword` against `password` automatically.
+
+Both fields can use the config override to apply `PasswordVisualTransformation`:
+
+```kotlin
+StringField(
+    state = passwordState,
+    onValueChange = { controller.updatePassword(it) },
+    onFocusLost = { controller.touchPassword() },
+    config = {
+        visualTransformation = PasswordVisualTransformation()
+        keyboardType = KeyboardType.Password
+    },
+)
+StringField(
+    state = confirmPasswordState,
+    onValueChange = { controller.updateConfirmPassword(it) },
+    onFocusLost = { controller.touchConfirmPassword() },
+    config = {
+        visualTransformation = PasswordVisualTransformation()
+        keyboardType = KeyboardType.Password
+    },
+)
+```
 
 ##### Conditional required with `@RequiredIf`
 
@@ -569,18 +764,7 @@ AnimatedVisibility(visible = phoneState.isVisible) {
         state = phoneState,
         onValueChange = { controller.updatePhone(it) },
         onFocusLost = { controller.touchPhone() },
-    ) {
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            label = { Text(label) },
-            isError = showError,
-            supportingText = if (showError) { { Text(errorMessage ?: "") } } else null,
-            keyboardOptions = keyboardOptions,
-            keyboardActions = keyboardActions,
-            modifier = modifier.fillMaxWidth(),
-        )
-    }
+    )
 }
 ```
 
@@ -632,7 +816,7 @@ AnimatedVisibility(visible = phoneState.isVisible) {
 |---|---|
 | `formidable-core` | Annotations, `FieldState`, `ValidationResult`, validator interfaces |
 | `formidable-ksp` | KSP processor — generates `*Controller` classes at compile time |
-| `formidable-compose` | `Formidable {}`, `Field`, `ConditionalField`, `FieldScope` |
+| `formidable-compose` | `Formidable {}`, field functions, `FieldScope`, `FieldStyle`, config DSL |
 
 ## Sample App
 

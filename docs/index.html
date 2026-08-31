@@ -41,6 +41,7 @@
       <div class="flex items-center gap-6 text-sm text-zinc-400">
         <a href="#install" class="hover:text-white transition-colors">Install</a>
         <a href="#docs" class="hover:text-white transition-colors">Docs</a>
+        <a href="#rendering" class="hover:text-white transition-colors">Rendering</a>
         <a href="./demo/" class="hover:text-white transition-colors">Live Demo</a>
         <a href="https://github.com/WassimBeltaief/Formidable" target="_blank" rel="noopener"
            class="hover:text-white transition-colors">GitHub ↗</a>
@@ -149,30 +150,35 @@ data class LoginForm(
           <h3 class="font-semibold text-white text-lg">Wire it in Compose</h3>
         </div>
         <p class="text-zinc-400 text-sm mb-4 ml-10">
-          Use <code class="text-violet-400">Formidable {}</code> and bind each field. The
-          <code class="text-violet-400">FieldScope</code> gives you everything you need — no boilerplate.
+          Call <code class="text-violet-400">StringField</code>, <code class="text-violet-400">BooleanField</code>,
+          <code class="text-violet-400">EnumField</code> etc. inside <code class="text-violet-400">Formidable {}</code>.
+          Auto-rendering handles the UI — override with <code class="text-violet-400">config = { }</code> when you need it,
+          or pass a trailing lambda for full control.
         </p>
         <pre><code class="language-kotlin">@Composable
 fun LoginScreen() {
     val controller = remember { LoginFormController() }
     val emailState by controller.email.collectAsState()
+    val passwordState by controller.password.collectAsState()
+    val isValid by controller.isValid.collectAsState()
 
     Formidable {
         StringField(
             state = emailState,
             onValueChange = { controller.updateEmail(it) },
             onFocusLost = { controller.touchEmail() },
-        ) {
-            OutlinedTextField(
-                value = value,
-                onValueChange = onValueChange,
-                modifier = modifier.fillMaxWidth(),
-                label = { Text(label) },
-                isError = showError,
-                supportingText = if (showError) {{ Text(errorMessage ?: "") }} else null,
-                keyboardOptions = keyboardOptions,
-                keyboardActions = keyboardActions,
-            )
+        )
+        StringField(
+            state = passwordState,
+            onValueChange = { controller.updatePassword(it) },
+            onFocusLost = { controller.touchPassword() },
+            config = {
+                keyboardType = KeyboardType.Password
+                visualTransformation = PasswordVisualTransformation()
+            },
+        )
+        Button(onClick = { /* submit */ }, enabled = isValid) {
+            Text("Login")
         }
     }
 }</code></pre>
@@ -180,10 +186,161 @@ fun LoginScreen() {
     </div>
   </section>
 
+  <!-- Three Rendering Modes -->
+  <section id="rendering" class="max-w-6xl mx-auto px-6 pb-24">
+    <h2 class="text-3xl font-bold text-white mb-2">Three rendering modes</h2>
+    <p class="text-zinc-400 mb-10">Every field supports three call forms. Start with auto-render, reach for config overrides when needed, drop to headless for full control.</p>
+
+    <div class="space-y-8">
+
+      <!-- Mode 1 -->
+      <div class="rounded-xl border border-zinc-800 bg-zinc-900/40 overflow-hidden">
+        <div class="px-6 py-4 border-b border-zinc-800 flex items-center gap-3">
+          <span class="px-2.5 py-0.5 rounded-full bg-violet-900/60 text-violet-300 text-xs font-semibold tracking-wide">Mode 1</span>
+          <h3 class="font-semibold text-white">Auto-render</h3>
+        </div>
+        <div class="px-6 py-4">
+          <p class="text-sm text-zinc-400 mb-4">
+            Renders a Material 3 <code class="text-violet-400">OutlinedTextField</code> (or the appropriate widget for the field type).
+            Wires label, hint, error message, and loading spinner — all from the field state. Zero boilerplate.
+          </p>
+          <pre><code class="language-kotlin">StringField(
+    state = emailState,
+    onValueChange = { controller.updateEmail(it) },
+    onFocusLost = { controller.touchEmail() },
+)
+
+BooleanField(
+    state = acceptTermsState,
+    onCheckedChange = { controller.updateAcceptTerms(it) },
+    onFocusLost = { controller.touchAcceptTerms() },
+)</code></pre>
+        </div>
+      </div>
+
+      <!-- Mode 2 -->
+      <div class="rounded-xl border border-zinc-800 bg-zinc-900/40 overflow-hidden">
+        <div class="px-6 py-4 border-b border-zinc-800 flex items-center gap-3">
+          <span class="px-2.5 py-0.5 rounded-full bg-violet-900/60 text-violet-300 text-xs font-semibold tracking-wide">Mode 2</span>
+          <h3 class="font-semibold text-white">Config override</h3>
+        </div>
+        <div class="px-6 py-4">
+          <p class="text-sm text-zinc-400 mb-4">
+            Still auto-rendered, but you override specific slots via a named
+            <code class="text-violet-400">config = { }</code> argument. The config must be a named argument —
+            trailing-lambda syntax is reserved for the headless API. Available slots:
+            <code class="text-violet-400">style</code>,
+            <code class="text-violet-400">keyboardType</code>,
+            <code class="text-violet-400">visualTransformation</code>,
+            <code class="text-violet-400">supportingText</code>,
+            <code class="text-violet-400">trailingIcon</code>,
+            <code class="text-violet-400">leadingIcon</code>,
+            <code class="text-violet-400">singleLine</code>.
+          </p>
+          <pre><code class="language-kotlin">// Password field — override keyboard type and visual transformation
+StringField(
+    state = passwordState,
+    onValueChange = { controller.updatePassword(it) },
+    onFocusLost = { controller.touchPassword() },
+    config = {
+        visualTransformation = PasswordVisualTransformation()
+        keyboardType = KeyboardType.Password
+    },
+)
+
+// Enum field rendered as radio group instead of dropdown
+EnumField(
+    state = contactMethodState,
+    options = ContactMethod.entries,
+    onSelect = { controller.updateContactMethod(it) },
+    config = { style = FieldStyle.Picker.RadioGroup },
+)
+
+// Switch row instead of checkbox row
+BooleanField(
+    state = notificationsState,
+    onCheckedChange = { controller.updateNotifications(it) },
+    onFocusLost = { controller.touchNotifications() },
+    config = { style = FieldStyle.Toggle.SwitchRow },
+)</code></pre>
+        </div>
+      </div>
+
+      <!-- Mode 3 -->
+      <div class="rounded-xl border border-zinc-800 bg-zinc-900/40 overflow-hidden">
+        <div class="px-6 py-4 border-b border-zinc-800 flex items-center gap-3">
+          <span class="px-2.5 py-0.5 rounded-full bg-violet-900/60 text-violet-300 text-xs font-semibold tracking-wide">Mode 3</span>
+          <h3 class="font-semibold text-white">Headless (trailing lambda)</h3>
+        </div>
+        <div class="px-6 py-4">
+          <p class="text-sm text-zinc-400 mb-4">
+            The trailing lambda receives a typed <code class="text-violet-400">FieldScope</code>.
+            You own the UI entirely — no Material 3 dependency used. The scope provides
+            <code class="text-violet-400">value</code>, <code class="text-violet-400">modifier</code>,
+            <code class="text-violet-400">keyboardOptions</code>, <code class="text-violet-400">keyboardActions</code>,
+            <code class="text-violet-400">showError</code>, <code class="text-violet-400">errorMessage</code>,
+            and more — see the FieldScope table below.
+          </p>
+          <pre><code class="language-kotlin">StringField(
+    state = emailState,
+    onValueChange = { controller.updateEmail(it) },
+    onFocusLost = { controller.touchEmail() },
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier.fillMaxWidth(),
+        label = { Text(label) },
+        isError = showError,
+        supportingText = if (showError) { { Text(errorMessage ?: "") } } else null,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+    )
+}</code></pre>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FieldStyle Reference -->
+  <section class="max-w-6xl mx-auto px-6 pb-24">
+    <h2 class="text-3xl font-bold text-white mb-2">FieldStyle reference</h2>
+    <p class="text-zinc-400 mb-8">Pass <code class="text-violet-400 text-sm">style = FieldStyle.*</code> inside a <code class="text-violet-400 text-sm">config = { }</code> block to change the rendered widget.</p>
+    <div class="overflow-x-auto rounded-xl border border-zinc-800">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-zinc-800 bg-zinc-900/60">
+            <th class="text-left px-5 py-3 text-zinc-400 font-medium">Field type</th>
+            <th class="text-left px-5 py-3 text-zinc-400 font-medium">Default style</th>
+            <th class="text-left px-5 py-3 text-zinc-400 font-medium">Other styles</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-800">
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">StringField<br/>NullableStringField<br/>IntField</td>
+            <td class="px-5 py-3 font-mono text-zinc-300">FieldStyle.Text.Outlined</td>
+            <td class="px-5 py-3 font-mono text-zinc-400">FieldStyle.Text.Filled</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">BooleanField</td>
+            <td class="px-5 py-3 font-mono text-zinc-300">FieldStyle.Toggle.CheckboxRow</td>
+            <td class="px-5 py-3 font-mono text-zinc-400">Toggle.Checkbox<br/>Toggle.Switch<br/>Toggle.SwitchRow</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">EnumField</td>
+            <td class="px-5 py-3 font-mono text-zinc-300">FieldStyle.Picker.Dropdown</td>
+            <td class="px-5 py-3 font-mono text-zinc-400">Picker.RadioGroup<br/>Picker.SegmentedButton</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
   <!-- FieldScope -->
   <section class="max-w-6xl mx-auto px-6 pb-24">
     <h2 class="text-3xl font-bold text-white mb-2">FieldScope</h2>
-    <p class="text-zinc-400 mb-8">Every field block receives a typed scope with these properties.</p>
+    <p class="text-zinc-400 mb-8">When using the headless trailing-lambda API, every field block receives a typed scope with these properties.</p>
     <div class="overflow-x-auto rounded-xl border border-zinc-800">
       <table class="w-full text-sm">
         <thead>
@@ -357,6 +514,30 @@ data class SignUpForm(
     @NotBlank("Username is required")
     @AsyncValidation(UniqueUsernameValidator::class)
     val username: String = "",
+)</code></pre>
+
+    <p class="text-zinc-400 mt-8 mb-4">
+      Use <code class="text-violet-400">config = { }</code> to override the supporting text and trailing icon
+      while keeping auto-rendering. <code class="text-violet-400">usernameState</code> is read from the outer
+      composable's <code class="text-violet-400">collectAsState()</code> — the config lambda stores composable
+      values but is not itself composable.
+    </p>
+    <pre><code class="language-kotlin">val usernameState by controller.username.collectAsState()
+
+StringField(
+    state = usernameState,
+    onValueChange = { controller.updateUsername(it) },
+    onFocusLost = { controller.touchUsername() },
+    config = {
+        supportingText = when {
+            usernameState.isValidating -> { { Text("Checking availability…") } }
+            usernameState.showError    -> { { Text(usernameState.errorMessage ?: "") } }
+            else -> null
+        }
+        trailingIcon = if (usernameState.isValidating) {
+            { CircularProgressIndicator(Modifier.size(20.dp)) }
+        } else null
+    },
 )</code></pre>
   </section>
 
