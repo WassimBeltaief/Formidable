@@ -309,7 +309,7 @@ internal class FormStateGenerator {
                             addStatement("val asyncResult$index = %T().validate(currentValue)", ClassName.bestGuess(async.validatorFqn))
                             beginControlFlow("if (!asyncResult$index.isValid)")
                             beginControlFlow("_%N.%M { s ->", field.name, updateFn)
-                            addStatement("s.copy(errors = asyncResult$index.errorsOrEmpty(), isValidating = false)")
+                            addStatement("s.copy(errors = asyncResult$index.errorsOrEmpty(), isValidating = false, isTouched = true)")
                             endControlFlow()
                             addStatement("return@launch")
                             endControlFlow()
@@ -338,12 +338,23 @@ internal class FormStateGenerator {
         schema: SchemaModel,
     ): FunSpec {
         val syncValidators = field.validators.filterNot { it is ValidatorRule.Async }
+        val hasAsync = field.validators.any { it is ValidatorRule.Async }
         return FunSpec.builder("touch${field.name.capitalize()}")
             .addCode(
                 buildCodeBlock {
                     beginControlFlow("_%N.%M { s ->", field.name, updateFn)
                     if (syncValidators.isEmpty()) {
+                        // No sync validators — just mark touched, preserve any existing async errors
                         addStatement("s.copy(isTouched = true)")
+                    } else if (hasAsync) {
+                        // Sync + async: run sync validators, but if sync passes keep existing errors
+                        // (which may be async errors set by the update function)
+                        addStatement("val formData = buildFormData()")
+                        add("val syncErrors = ")
+                        add(runValidatorsExpr(syncValidators, "s.value", "formData"))
+                        addStatement(".errorsOrEmpty()")
+                        addStatement("val errors = if (syncErrors.isNotEmpty()) syncErrors else s.errors")
+                        addStatement("s.copy(isTouched = true, errors = errors)")
                     } else {
                         addStatement("val formData = buildFormData()")
                         add("val errors = ")
