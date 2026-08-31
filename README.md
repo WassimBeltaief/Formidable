@@ -17,7 +17,7 @@ Formidable is a Kotlin Multiplatform library that generates type-safe form contr
 
 ## Try it live
 
-> 🌐 **[formidable.wassimbeltaief.dev](https://wassimbeltaief.github.io/Formidable/)** — interactive demo running in the browser
+> 🌐 **[wassimbeltaief.github.io/Formidable](https://wassimbeltaief.github.io/Formidable/)** — interactive demo running in the browser
 
 ## Requirements
 
