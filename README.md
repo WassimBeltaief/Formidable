@@ -4,7 +4,7 @@
   <img src="docs/assets/screenshot.png" alt="Formidable — Headless forms for Jetpack Compose" width="100%" />
 </p>
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.wassimbeltaief.formidable/formidable-core.svg?label=Maven%20Central)](https://central.sonatype.com/search?q=com.wassimbeltaief.formidable)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.wassimbeltaief/formidable-core.svg?label=Maven%20Central)](https://central.sonatype.com/namespace/io.github.wassimbeltaief)
 [![CI](https://github.com/WassimBeltaief/Formidable/actions/workflows/ci.yml/badge.svg)](https://github.com/WassimBeltaief/Formidable/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/WassimBeltaief/Formidable/branch/master/graph/badge.svg)](https://codecov.io/gh/WassimBeltaief/Formidable)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -107,9 +107,9 @@ plugins {
 }
 
 dependencies {
-    implementation("com.wassimbeltaief.formidable:formidable-core:2.0.1")
-    implementation("com.wassimbeltaief.formidable:formidable-compose:2.0.1")
-    ksp("com.wassimbeltaief.formidable:formidable-ksp:2.0.1")
+    implementation("io.github.wassimbeltaief:formidable-core:2.0.1")
+    implementation("io.github.wassimbeltaief:formidable-compose:2.0.1")
+    ksp("io.github.wassimbeltaief:formidable-ksp:2.0.1")
 }
 ```
 
@@ -126,15 +126,15 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.wassimbeltaief.formidable:formidable-core:2.0.1")
-            implementation("com.wassimbeltaief.formidable:formidable-compose:2.0.1")
+            implementation("io.github.wassimbeltaief:formidable-core:2.0.1")
+            implementation("io.github.wassimbeltaief:formidable-compose:2.0.1")
         }
     }
 }
 
 dependencies {
     // KSP processes @FormSchema in commonMain, generates a Controller for all targets
-    add("kspCommonMainMetadata", "com.wassimbeltaief.formidable:formidable-ksp:2.0.1")
+    add("kspCommonMainMetadata", "io.github.wassimbeltaief:formidable-ksp:2.0.1")
 }
 
 // Ensure KSP metadata runs before any compilation task
@@ -187,7 +187,7 @@ kotlin.sourceSets.commonMain {
 - **Server error DSL** — `controller.setErrors(mapOf("username" to "Already taken"))` batch API
 - **Accessibility** — screen reader semantics and content descriptions wired into auto-render
 - **Binary API compatibility** — Kotlin binary compatibility validator in CI
-- **Maven Central publishing** — `com.wassimbeltaief.formidable:*` on Maven Central
+- **Maven Central publishing** — `io.github.wassimbeltaief:*` on Maven Central
 
 ---
 
