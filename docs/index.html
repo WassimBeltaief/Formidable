@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Formidable — Headless form engine for Jetpack Compose</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/kotlin.min.js"></script>
+  <script>hljs.highlightAll();</script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            zinc: { 950: '#09090b' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background: #09090b; }
+    pre { margin: 0; }
+    pre code.hljs { border-radius: 0.5rem; font-size: 0.85rem; }
+    .step-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 1.75rem; height: 1.75rem; border-radius: 50%;
+      background: #7c3aed; color: #fff; font-weight: 700; font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body class="text-zinc-100 font-sans antialiased">
+
+  <!-- Nav -->
+  <nav class="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur">
+    <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+      <span class="font-bold text-lg tracking-tight text-white">Formidable</span>
+      <div class="flex items-center gap-6 text-sm text-zinc-400">
+        <a href="#install" class="hover:text-white transition-colors">Install</a>
+        <a href="#docs" class="hover:text-white transition-colors">Docs</a>
+        <a href="./demo/" class="hover:text-white transition-colors">Live Demo</a>
+        <a href="https://github.com/WassimBeltaief/Formidable" target="_blank" rel="noopener"
+           class="hover:text-white transition-colors">GitHub ↗</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="max-w-6xl mx-auto px-6 pt-24 pb-20 text-center">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-violet-700 bg-violet-950/50 text-violet-400 text-xs font-medium mb-8">
+      KSP-powered · Compose Multiplatform · No reflection
+    </div>
+    <h1 class="text-5xl md:text-6xl font-bold text-white leading-tight mb-6">
+      Headless forms for<br/>
+      <span class="text-violet-400">Jetpack Compose</span>
+    </h1>
+    <p class="text-xl text-zinc-400 max-w-2xl mx-auto mb-10">
+      Annotate a data class, get a type-safe controller. Sync &amp; async validation,
+      cross-field rules, conditional visibility — no runtime reflection.
+    </p>
+    <div class="flex items-center justify-center gap-4 flex-wrap">
+      <a href="#install"
+         class="px-6 py-3 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-semibold transition-colors">
+        Get started
+      </a>
+      <a href="./demo/"
+         class="px-6 py-3 rounded-lg border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white font-semibold transition-colors">
+        Live demo →
+      </a>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="max-w-6xl mx-auto px-6 pb-24">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="p-5 rounded-xl border border-zinc-800 bg-zinc-900/50">
+        <div class="text-2xl mb-3">⚡</div>
+        <h3 class="font-semibold text-white mb-1">KSP code generation</h3>
+        <p class="text-sm text-zinc-400">Zero runtime reflection. A typed controller is generated at compile time from your annotated data class.</p>
+      </div>
+      <div class="p-5 rounded-xl border border-zinc-800 bg-zinc-900/50">
+        <div class="text-2xl mb-3">🔒</div>
+        <h3 class="font-semibold text-white mb-1">Type-safe validation</h3>
+        <p class="text-sm text-zinc-400">Sync and async validators, cross-field rules, conditional visibility — all checked at compile time.</p>
+      </div>
+      <div class="p-5 rounded-xl border border-zinc-800 bg-zinc-900/50">
+        <div class="text-2xl mb-3">🎨</div>
+        <h3 class="font-semibold text-white mb-1">Headless by design</h3>
+        <p class="text-sm text-zinc-400">No UI opinions. You own every pixel. Wire any composable to a FieldScope and you're done.</p>
+      </div>
+      <div class="p-5 rounded-xl border border-zinc-800 bg-zinc-900/50">
+        <div class="text-2xl mb-3">🌍</div>
+        <h3 class="font-semibold text-white mb-1">Multiplatform</h3>
+        <p class="text-sm text-zinc-400">Android, iOS, and WASM via Compose Multiplatform. One schema, every target.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Install -->
+  <section id="install" class="max-w-6xl mx-auto px-6 pb-24">
+    <h2 class="text-3xl font-bold text-white mb-2">Installation</h2>
+    <p class="text-zinc-400 mb-8">Add the dependencies and the KSP plugin to your module's <code class="text-violet-400 text-sm">build.gradle.kts</code>.</p>
+    <pre><code class="language-kotlin">plugins {
+    id("com.google.devtools.ksp")
+}
+
+dependencies {
+    implementation("io.github.wassimbeltaief:formidable-core:2.0.0")
+    implementation("io.github.wassimbeltaief:formidable-compose:2.0.0")
+    ksp("io.github.wassimbeltaief:formidable-ksp:2.0.0")
+}</code></pre>
+  </section>
+
+  <!-- Quick Start -->
+  <section id="docs" class="max-w-6xl mx-auto px-6 pb-24">
+    <h2 class="text-3xl font-bold text-white mb-2">Quick start</h2>
+    <p class="text-zinc-400 mb-10">Two steps: annotate a data class, wire the fields in Compose.</p>
+
+    <div class="space-y-10">
+      <!-- Step 1 -->
+      <div>
+        <div class="flex items-center gap-3 mb-4">
+          <span class="step-num">1</span>
+          <h3 class="font-semibold text-white text-lg">Define your schema</h3>
+        </div>
+        <p class="text-zinc-400 text-sm mb-4 ml-10">
+          Annotate a plain data class with <code class="text-violet-400">@FormSchema</code>. KSP generates a
+          <code class="text-violet-400">LoginFormController</code> for you at build time.
+        </p>
+        <pre><code class="language-kotlin">@FormSchema
+data class LoginForm(
+    @Field(label = "Email", hint = "you@example.com")
+    @Email("Please enter a valid email")
+    val email: String = "",
+
+    @Field(label = "Password", hint = "At least 8 characters")
+    @MinLength(8, "Password must be at least 8 characters")
+    val password: String = "",
+)</code></pre>
+      </div>
+
+      <!-- Step 2 -->
+      <div>
+        <div class="flex items-center gap-3 mb-4">
+          <span class="step-num">2</span>
+          <h3 class="font-semibold text-white text-lg">Wire it in Compose</h3>
+        </div>
+        <p class="text-zinc-400 text-sm mb-4 ml-10">
+          Use <code class="text-violet-400">Formidable {}</code> and bind each field. The
+          <code class="text-violet-400">FieldScope</code> gives you everything you need — no boilerplate.
+        </p>
+        <pre><code class="language-kotlin">@Composable
+fun LoginScreen() {
+    val controller = remember { LoginFormController() }
+    val emailState by controller.email.collectAsState()
+
+    Formidable {
+        StringField(
+            state = emailState,
+            onValueChange = { controller.updateEmail(it) },
+            onFocusLost = { controller.touchEmail() },
+        ) {
+            OutlinedTextField(
+                value = value,
+                onValueChange = onValueChange,
+                modifier = modifier.fillMaxWidth(),
+                label = { Text(label) },
+                isError = showError,
+                supportingText = if (showError) {{ Text(errorMessage ?: "") }} else null,
+                keyboardOptions = keyboardOptions,
+                keyboardActions = keyboardActions,
+            )
+        }
+    }
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- FieldScope -->
+  <section class="max-w-6xl mx-auto px-6 pb-24">
+    <h2 class="text-3xl font-bold text-white mb-2">FieldScope</h2>
+    <p class="text-zinc-400 mb-8">Every field block receives a typed scope with these properties.</p>
+    <div class="overflow-x-auto rounded-xl border border-zinc-800">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-zinc-800 bg-zinc-900/60">
+            <th class="text-left px-5 py-3 text-zinc-400 font-medium">Property</th>
+            <th class="text-left px-5 py-3 text-zinc-400 font-medium">Type</th>
+            <th class="text-left px-5 py-3 text-zinc-400 font-medium">Description</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-800">
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">value</td>
+            <td class="px-5 py-3 text-zinc-400">T</td>
+            <td class="px-5 py-3 text-zinc-300">Current field value</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">onValueChange</td>
+            <td class="px-5 py-3 text-zinc-400">(T) → Unit</td>
+            <td class="px-5 py-3 text-zinc-300">Called on every keystroke</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">showError</td>
+            <td class="px-5 py-3 text-zinc-400">Boolean</td>
+            <td class="px-5 py-3 text-zinc-300">True when the field is touched and has errors</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">errorMessage</td>
+            <td class="px-5 py-3 text-zinc-400">String?</td>
+            <td class="px-5 py-3 text-zinc-300">First validation error, or null</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">isValidating</td>
+            <td class="px-5 py-3 text-zinc-400">Boolean</td>
+            <td class="px-5 py-3 text-zinc-300">True while an async validator is running</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">label</td>
+            <td class="px-5 py-3 text-zinc-400">String</td>
+            <td class="px-5 py-3 text-zinc-300">Label from <code class="text-violet-400">@Field</code></td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">hint</td>
+            <td class="px-5 py-3 text-zinc-400">String</td>
+            <td class="px-5 py-3 text-zinc-300">Placeholder hint from <code class="text-violet-400">@Field</code></td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">modifier</td>
+            <td class="px-5 py-3 text-zinc-400">Modifier</td>
+            <td class="px-5 py-3 text-zinc-300">Pre-wired with focus requester and scroll anchor</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">keyboardOptions</td>
+            <td class="px-5 py-3 text-zinc-400">KeyboardOptions</td>
+            <td class="px-5 py-3 text-zinc-300">Auto-configured ImeAction (Next / Done)</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">keyboardActions</td>
+            <td class="px-5 py-3 text-zinc-400">KeyboardActions</td>
+            <td class="px-5 py-3 text-zinc-300">Auto-focuses next field on Next action</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Annotations -->
+  <section class="max-w-6xl mx-auto px-6 pb-24">
+    <h2 class="text-3xl font-bold text-white mb-2">Annotations</h2>
+    <p class="text-zinc-400 mb-8">All annotations live in <code class="text-violet-400 text-sm">formidable-core</code>.</p>
+    <div class="overflow-x-auto rounded-xl border border-zinc-800">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-zinc-800 bg-zinc-900/60">
+            <th class="text-left px-5 py-3 text-zinc-400 font-medium">Annotation</th>
+            <th class="text-left px-5 py-3 text-zinc-400 font-medium">Target</th>
+            <th class="text-left px-5 py-3 text-zinc-400 font-medium">Description</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-800">
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">@FormSchema</td>
+            <td class="px-5 py-3 text-zinc-400">class</td>
+            <td class="px-5 py-3 text-zinc-300">Triggers controller code generation</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">@Field(label, hint)</td>
+            <td class="px-5 py-3 text-zinc-400">property</td>
+            <td class="px-5 py-3 text-zinc-300">Attaches label and placeholder hint to a field</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">@NotBlank</td>
+            <td class="px-5 py-3 text-zinc-400">String</td>
+            <td class="px-5 py-3 text-zinc-300">Must not be blank</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">@MinLength(n)</td>
+            <td class="px-5 py-3 text-zinc-400">String</td>
+            <td class="px-5 py-3 text-zinc-300">Minimum character count</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">@MaxLength(n)</td>
+            <td class="px-5 py-3 text-zinc-400">String</td>
+            <td class="px-5 py-3 text-zinc-300">Maximum character count</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">@Email</td>
+            <td class="px-5 py-3 text-zinc-400">String</td>
+            <td class="px-5 py-3 text-zinc-300">Valid email format</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">@Pattern(regex)</td>
+            <td class="px-5 py-3 text-zinc-400">String</td>
+            <td class="px-5 py-3 text-zinc-300">Matches a regular expression</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">@IntRange(min, max)</td>
+            <td class="px-5 py-3 text-zinc-400">Int</td>
+            <td class="px-5 py-3 text-zinc-300">Value within the given range</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">@MustBeTrue</td>
+            <td class="px-5 py-3 text-zinc-400">Boolean</td>
+            <td class="px-5 py-3 text-zinc-300">Must be true — for checkbox consent</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">@MatchField(field)</td>
+            <td class="px-5 py-3 text-zinc-400">String</td>
+            <td class="px-5 py-3 text-zinc-300">Must equal the value of another field</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">@RequiredIf(field, value)</td>
+            <td class="px-5 py-3 text-zinc-400">String?</td>
+            <td class="px-5 py-3 text-zinc-300">Required only when another field equals a value</td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">@AsyncValidation(KClass)</td>
+            <td class="px-5 py-3 text-zinc-400">any</td>
+            <td class="px-5 py-3 text-zinc-300">Runs a suspending <code class="text-violet-400">AsyncFieldValidator</code></td>
+          </tr>
+          <tr class="hover:bg-zinc-900/40 transition-colors">
+            <td class="px-5 py-3 font-mono text-violet-400">@VisibleWhen(field, KClass)</td>
+            <td class="px-5 py-3 text-zinc-400">any</td>
+            <td class="px-5 py-3 text-zinc-300">Conditionally shows or hides a field</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Async validation -->
+  <section class="max-w-6xl mx-auto px-6 pb-24">
+    <h2 class="text-3xl font-bold text-white mb-2">Async validation</h2>
+    <p class="text-zinc-400 mb-8">
+      Implement <code class="text-violet-400">AsyncFieldValidator&lt;T&gt;</code> and attach it with
+      <code class="text-violet-400">@AsyncValidation</code>. The controller debounces automatically and
+      exposes <code class="text-violet-400">isValidating</code> for a loading indicator.
+    </p>
+    <pre><code class="language-kotlin">class UniqueUsernameValidator : AsyncFieldValidator&lt;String&gt; {
+    override suspend fun validate(value: String): ValidationResult {
+        val taken = api.checkUsername(value)
+        return if (taken)
+            ValidationResult.Invalid(listOf("Username '$value' is already taken"))
+        else
+            ValidationResult.Valid
+    }
+}
+
+@FormSchema
+data class SignUpForm(
+    @Field(label = "Username")
+    @NotBlank("Username is required")
+    @AsyncValidation(UniqueUsernameValidator::class)
+    val username: String = "",
+)</code></pre>
+  </section>
+
+  <!-- Cross-field -->
+  <section class="max-w-6xl mx-auto px-6 pb-24">
+    <h2 class="text-3xl font-bold text-white mb-2">Cross-field validation</h2>
+    <p class="text-zinc-400 mb-8">
+      Use <code class="text-violet-400">@MatchField</code> to require a field to match another —
+      the classic password confirmation pattern. The generated controller re-validates the dependent
+      field automatically whenever the source changes.
+    </p>
+    <pre><code class="language-kotlin">@FormSchema
+data class SignUpForm(
+    @Field(label = "Password")
+    @MinLength(8)
+    val password: String = "",
+
+    @Field(label = "Confirm password")
+    @MatchField("password", "Passwords do not match")
+    val confirmPassword: String = "",
+)</code></pre>
+  </section>
+
+  <!-- Live demo CTA -->
+  <section class="max-w-6xl mx-auto px-6 pb-24">
+    <div class="rounded-2xl border border-violet-700/50 bg-violet-950/20 p-10 text-center">
+      <h2 class="text-3xl font-bold text-white mb-3">See it live</h2>
+      <p class="text-zinc-400 mb-8 max-w-lg mx-auto">
+        A full sign-up form running live in your browser via Compose Multiplatform WASM.
+        Async validation, cross-field rules, conditional visibility — all in one demo.
+      </p>
+      <a href="./demo/"
+         class="inline-block px-8 py-3 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-semibold transition-colors text-lg">
+        Open live demo →
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-zinc-800">
+    <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between text-sm text-zinc-500">
+      <span>Formidable · MIT License</span>
+      <a href="https://github.com/WassimBeltaief/Formidable" target="_blank" rel="noopener"
+         class="hover:text-zinc-300 transition-colors">GitHub ↗</a>
+    </div>
+  </footer>
+
+</body>
+</html>

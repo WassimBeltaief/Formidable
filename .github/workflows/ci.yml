@@ -89,11 +89,20 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Download WASM artifact
         uses: actions/download-artifact@v4
         with:
           name: wasm-showcase
-          path: dist/
+          path: wasm-dist/
+
+      - name: Assemble site
+        run: |
+          mkdir -p dist/demo
+          cp -r docs/. dist/
+          cp -r wasm-dist/. dist/demo/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
