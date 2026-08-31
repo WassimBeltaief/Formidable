@@ -1,11 +1,11 @@
 # Formidable
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![CI](https://github.com/WassimBeltaief/formidable/actions/workflows/ci.yml/badge.svg)](https://github.com/WassimBeltaief/formidable/actions/workflows/ci.yml)
+[![CI](https://github.com/WassimBeltaief/Formidable/actions/workflows/ci.yml/badge.svg)](https://github.com/WassimBeltaief/Formidable/actions/workflows/ci.yml)
 
 > Headless, schema-driven form engine for Compose Multiplatform
 
-Formidable is a Kotlin Multiplatform library that generates type-safe form controllers from annotated data classes. Define your form schema once, get validation, state management, and Compose integration for free — on Android, iOS, and Web.
+Formidable generates type-safe form controllers from annotated data classes. Define your form once — get state management, validation, and Compose integration on Android, iOS, and Web.
 
 ## Highlights
 
@@ -13,77 +13,36 @@ Formidable is a Kotlin Multiplatform library that generates type-safe form contr
 - **Type-safe** — Generated controllers with strongly-typed field access
 - **Headless** — You own the UI, Formidable handles the state
 - **Validation** — Sync, async, and cross-field validation out of the box
-- **Multiplatform** — Android, iOS, and WASM (Web) via Compose Multiplatform
+- **Multiplatform** — Android, iOS, and WASM via Compose Multiplatform
 
 ## Try it live
 
 > 🌐 **[wassimbeltaief.github.io/Formidable](https://wassimbeltaief.github.io/Formidable/)** — interactive demo running in the browser
 
-## Requirements
-
-- Kotlin 2.0+
-- Compose Multiplatform 1.8+
-- Android SDK 24+ (for Android target)
-
-## Installation
-
-Add the dependencies to your module's `build.gradle.kts`:
-
-```kotlin
-plugins {
-    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
-}
-
-kotlin {
-    sourceSets {
-        commonMain.dependencies {
-            implementation("com.wassimbeltaief.formidable:formidable-core:2.0.0")
-            implementation("com.wassimbeltaief.formidable:formidable-compose:2.0.0")
-        }
-    }
-}
-
-dependencies {
-    // KSP processes @FormSchema in commonMain, generates Controller for all targets
-    add("kspCommonMainMetadata", "com.wassimbeltaief.formidable:formidable-ksp:2.0.0")
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
-    if (name != "kspCommonMainKotlinMetadata") {
-        dependsOn("kspCommonMainKotlinMetadata")
-    }
-}
-
-kotlin.sourceSets.commonMain {
-    kotlin.srcDir(layout.buildDirectory.dir("generated/ksp/metadata/commonMain/kotlin"))
-}
-```
+---
 
 ## Quick Start
 
-### 1. Define your form schema
+Three steps. That's it.
+
+### 1. Annotate a data class
 
 ```kotlin
 @FormSchema
 data class LoginForm(
-    @Field(label = "Email", hint = "Enter your email")
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
+    @Field(label = "Email")
+    @Email
     val email: String = "",
 
-    @Field(label = "Password", hint = "Enter your password")
-    @NotBlank(message = "Password is required")
-    @MinLength(min = 8, message = "Password must be at least 8 characters")
+    @Field(label = "Password")
+    @MinLength(8)
     val password: String = "",
-
-    @Field(label = "Remember me")
-    val rememberMe: Boolean = false,
 )
 ```
 
 ### 2. Use the generated controller
 
-KSP generates a `LoginFormController` class:
+KSP generates `LoginFormController` — no boilerplate, no reflection.
 
 ```kotlin
 class LoginViewModel : ViewModel() {
@@ -91,13 +50,12 @@ class LoginViewModel : ViewModel() {
 }
 ```
 
-### 3. Build your UI with Compose
+### 3. Build your UI
 
 ```kotlin
 @Composable
 fun LoginScreen(viewModel: LoginViewModel) {
     val emailState by viewModel.controller.email.collectAsState()
-    val passwordState by viewModel.controller.password.collectAsState()
     val isValid by viewModel.controller.isValid.collectAsState()
 
     Formidable {
@@ -111,129 +69,528 @@ fun LoginScreen(viewModel: LoginViewModel) {
                 onValueChange = onValueChange,
                 label = { Text(label) },
                 isError = showError,
-                supportingText = if (showError) {{ Text(errorMessage ?: "") }} else null,
+                supportingText = if (showError) { { Text(errorMessage ?: "") } } else null,
                 keyboardOptions = keyboardOptions,
                 keyboardActions = keyboardActions,
                 modifier = modifier.fillMaxWidth(),
             )
         }
 
-        // Password field, remember me checkbox...
-
-        Button(
-            onClick = { /* submit */ },
-            enabled = isValid,
-        ) {
+        Button(onClick = { /* submit */ }, enabled = isValid) {
             Text("Login")
         }
     }
 }
 ```
 
-## Validation Annotations
+You get validation, error display, focus management, and keyboard navigation for free.
 
-### String Validators
+---
 
-| Annotation | Description |
-|------------|-------------|
-| `@NotBlank` | Field must not be empty or blank |
-| `@MinLength(min)` | Minimum character count |
-| `@MaxLength(max)` | Maximum character count |
-| `@Email` | Valid email format |
-| `@Pattern(regex)` | Custom regex pattern |
-
-### Number Validators
-
-| Annotation | Description |
-|------------|-------------|
-| `@IntRange(min, max)` | Integer must be within range |
-
-### Boolean Validators
-
-| Annotation | Description |
-|------------|-------------|
-| `@MustBeTrue` | Checkbox must be checked (e.g., terms acceptance) |
-
-### Cross-Field Validation
-
-| Annotation | Description |
-|------------|-------------|
-| `@MatchField(targetField)` | Must match another field (e.g., password confirmation) |
-| `@RequiredIf(targetField, targetValue)` | Required when another field has a specific value |
-| `@VisibleWhen(targetField, targetValue)` | Show/hide based on another field's value |
-
-### Async Validation
+## Installation
 
 ```kotlin
-@Field(label = "Username")
-@AsyncValidation(UniqueUsernameValidator::class)
-val username: String = ""
+// build.gradle.kts
+plugins {
+    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
+}
 
-class UniqueUsernameValidator : AsyncFieldValidator<String> {
-    override suspend fun validate(value: String): ValidationResult {
-        delay(300) // debounce
-        val isAvailable = checkUsernameAvailability(value)
-        return if (isAvailable) ValidationResult.Valid
-               else ValidationResult.Invalid(listOf("Username already taken"))
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation("com.wassimbeltaief.formidable:formidable-core:2.0.1")
+            implementation("com.wassimbeltaief.formidable:formidable-compose:2.0.1")
+        }
+    }
+}
+
+dependencies {
+    // KSP processes @FormSchema in commonMain, generates a Controller for all targets
+    add("kspCommonMainMetadata", "com.wassimbeltaief.formidable:formidable-ksp:2.0.1")
+}
+
+// Make all compilation tasks depend on KSP metadata generation
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
+    if (name != "kspCommonMainKotlinMetadata") {
+        dependsOn("kspCommonMainKotlinMetadata")
+    }
+}
+
+kotlin.sourceSets.commonMain {
+    kotlin.srcDir(layout.buildDirectory.dir("generated/ksp/metadata/commonMain/kotlin"))
+}
+```
+
+---
+
+## In-Depth Guide
+
+### 1. Schema → Generated Controller
+
+A `@FormSchema` data class is the single source of truth for your form. KSP reads it at compile time and generates a `*Controller` class — no runtime annotation scanning, no reflection.
+
+**You write:**
+
+```kotlin
+@FormSchema
+data class SignUpForm(
+    @Field(label = "Username", hint = "Pick a username")
+    @NotBlank
+    val username: String = "",
+
+    @Field(label = "Age")
+    @IntRange(min = 18, max = 120)
+    val age: Int = 0,
+
+    @Field(label = "Accept terms")
+    @MustBeTrue(message = "You must accept the terms")
+    val acceptTerms: Boolean = false,
+)
+```
+
+**KSP generates `SignUpFormController`:**
+
+```kotlin
+// Generated — do not edit
+class SignUpFormController {
+    val username: StateFlow<FieldState<String>>
+    val age:      StateFlow<FieldState<Int>>
+    val acceptTerms: StateFlow<FieldState<Boolean>>
+
+    fun updateUsername(value: String)
+    fun touchUsername()              // marks the field as interacted with
+
+    fun updateAge(value: Int)
+    fun touchAge()
+
+    fun updateAcceptTerms(value: Boolean)
+    fun touchAcceptTerms()
+
+    val isValid: StateFlow<Boolean>  // true when all fields pass validation
+    val data: SignUpForm             // snapshot of current values
+
+    fun validateAllSync(): Boolean   // force-touch all fields and validate
+    fun reset()                      // restore initial values, clear touched state
+    fun clear()                      // reset to default (empty) values
+    fun setFieldError(field: String, message: String) // inject server-side errors
+}
+```
+
+Every property on the data class gets its own `StateFlow<FieldState<T>>` and a pair of `update*` / `touch*` functions. The controller is plain Kotlin — framework-agnostic, testable without Compose.
+
+---
+
+### 2. The Controller in Detail
+
+#### FieldState
+
+Each field's flow emits a `FieldState<T>`:
+
+```kotlin
+data class FieldState<T>(
+    val value: T,           // current input value
+    val errors: List<String>, // validation error messages (empty = valid)
+    val isTouched: Boolean, // user has left the field at least once
+    val isDirty: Boolean,   // value differs from the initial value
+    val isValidating: Boolean, // async validation in progress
+    val isVisible: Boolean, // controlled by @VisibleWhen
+    val label: String,
+    val hint: String,
+)
+```
+
+`showError` is derived: errors are only surfaced once `isTouched = true`. This prevents error messages from flashing before the user has had a chance to type.
+
+#### isValid
+
+`isValid` is a `StateFlow<Boolean>` that recomputes whenever any field changes. It's `true` only when every visible, non-optional field passes all its validators.
+
+#### validateAllSync / submit pattern
+
+Call `validateAllSync()` on submit to force-touch all fields and return whether the form is valid:
+
+```kotlin
+Button(onClick = {
+    if (viewModel.controller.validateAllSync()) {
+        submitForm(viewModel.controller.data)
+    }
+})
+```
+
+#### Injecting server-side errors
+
+After a failed API call, push errors back into specific fields:
+
+```kotlin
+viewModel.controller.setFieldError("username", "This username is already taken")
+```
+
+---
+
+### 3. Connecting to Compose
+
+Wrap your fields in `Formidable {}`. It wires up focus management, keyboard navigation (Next / Done), and scroll-to-error automatically.
+
+```kotlin
+@Composable
+fun SignUpScreen(viewModel: SignUpViewModel) {
+    Formidable(state = viewModel.controller) {
+        // Fields declared here are registered in focus order
+        StringField(...) { /* your OutlinedTextField */ }
+        IntField(...)    { /* your OutlinedTextField */ }
+        BooleanField(...)  { /* your Checkbox row */ }
+
+        Button(onClick = { viewModel.controller.validateAllSync() }) {
+            Text("Sign up")
+        }
     }
 }
 ```
 
-## Field Types
+Each `*Field` lambda receives a `FieldScope` — a set of pre-computed properties you plug directly into your UI component.
 
-Formidable supports the following field types:
+---
 
-| Type | Compose Function | Notes |
-|------|------------------|-------|
-| `String` | `StringField` | Required string |
-| `String?` | `NullableStringField` | Optional string |
-| `Int` | `IntField` | Integer with keyboard type |
-| `Boolean` | `BooleanField` | Checkbox/switch |
-| `Enum<T>` | `EnumField` | Auto-detected, no annotation needed |
-| `Enum<T>?` | `NullableEnumField` | Optional enum |
+### 4. FieldScope — What You Get Inside a Field
 
-## Generated Controller API
+Every field lambda receives a typed `FieldScope`. You don't call any functions — just read the properties and pass them to your composable.
 
-For a `@FormSchema` class, KSP generates:
+| Property | Type | Description |
+|---|---|---|
+| `value` | `T` | Current field value |
+| `onValueChange` | `(T) -> Unit` | Call this when the user edits the field |
+| `label` | `String` | From `@Field(label = ...)` |
+| `hint` | `String` | From `@Field(hint = ...)` |
+| `errors` | `List<String>` | All current validation error messages |
+| `errorMessage` | `String?` | First error message, or `null` |
+| `showError` | `Boolean` | `true` when field is touched **and** has errors |
+| `isTouched` | `Boolean` | User has focused then left this field |
+| `isDirty` | `Boolean` | Value differs from initial |
+| `isValidating` | `Boolean` | Async validator is running |
+| `modifier` | `Modifier` | Pre-wired with focus requester and scroll anchor |
+| `keyboardOptions` | `KeyboardOptions` | Auto-configured (type + Next/Done) |
+| `keyboardActions` | `KeyboardActions` | Moves focus to the next field, or submits |
+
+The `modifier`, `keyboardOptions`, and `keyboardActions` are the most important: pass them directly to your text field and keyboard navigation just works.
+
+---
+
+### 5. Field Types
+
+Formidable supports the following Kotlin types. Each maps to a typed Compose function and a corresponding `FieldScope<T>`.
+
+| Kotlin type | Compose function | FieldScope value type |
+|---|---|---|
+| `String` | `StringField` | `String` |
+| `String?` | `NullableStringField` | `String` |
+| `Int` | `IntField` | `Int` |
+| `Boolean` | `BooleanField` | `Boolean` |
+| `Enum<T>` | `EnumField` | `T` (your enum) |
+| `Enum<T>?` | `NullableEnumField` | `T?` |
+
+---
+
+### 6. Field Examples
+
+#### String field
+
+The most common case — a required text input with validation.
 
 ```kotlin
-class LoginFormController {
-    // Field state flows
-    val email: StateFlow<FieldState<String>>
-    val password: StateFlow<FieldState<String>>
+@FormSchema
+data class LoginForm(
+    @Field(label = "Email", hint = "you@example.com")
+    @NotBlank
+    @Email
+    val email: String = "",
+)
+```
 
-    // Form-level state
-    val isValid: StateFlow<Boolean>
-
-    // Field operations
-    fun updateEmail(value: String)
-    fun touchEmail()
-
-    // Form operations
-    fun validateAllSync(): Boolean
-    fun reset()
-    fun clear()
-
-    // Current form data
-    val data: LoginForm
+```kotlin
+StringField(
+    state = emailState,
+    onValueChange = { controller.updateEmail(it) },
+    onFocusLost = { controller.touchEmail() },
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        placeholder = { Text(hint) },
+        isError = showError,
+        supportingText = if (showError) { { Text(errorMessage ?: "") } } else null,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+        modifier = modifier.fillMaxWidth(),
+    )
 }
 ```
+
+---
+
+#### Boolean field (checkbox)
+
+```kotlin
+@Field(label = "I accept the terms and conditions")
+@MustBeTrue(message = "You must accept the terms")
+val acceptTerms: Boolean = false,
+```
+
+```kotlin
+BooleanField(
+    state = acceptTermsState,
+    onCheckedChange = { controller.updateAcceptTerms(it) },
+    onFocusLost = { controller.touchAcceptTerms() },
+) {
+    Column(modifier = modifier) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(checked = value, onCheckedChange = onValueChange)
+            Text(label)
+        }
+        if (showError) {
+            Text(errorMessage ?: "", color = MaterialTheme.colorScheme.error)
+        }
+    }
+}
+```
+
+---
+
+#### Int field
+
+```kotlin
+@Field(label = "Age")
+@IntRange(min = 18, max = 120, message = "Must be between 18 and 120")
+val age: Int = 0,
+```
+
+```kotlin
+IntField(
+    state = ageState,
+    onValueChange = { controller.updateAge(it) },
+    onFocusLost = { controller.touchAge() },
+) {
+    OutlinedTextField(
+        value = if (value == 0) "" else value.toString(),
+        onValueChange = { onValueChange(it.toIntOrNull() ?: 0) },
+        label = { Text(label) },
+        isError = showError,
+        supportingText = if (showError) { { Text(errorMessage ?: "") } } else null,
+        keyboardOptions = keyboardOptions, // already set to KeyboardType.Number
+        keyboardActions = keyboardActions,
+        modifier = modifier.fillMaxWidth(),
+    )
+}
+```
+
+---
+
+#### Optional string field
+
+Use `String?` for fields that are truly optional. `NullableStringField` emits `null` when the user clears the input.
+
+```kotlin
+@Field(label = "Nickname", hint = "Optional")
+val nickname: String? = null,
+```
+
+```kotlin
+NullableStringField(
+    state = nicknameState,
+    onValueChange = { controller.updateNickname(it) },
+    onFocusLost = { controller.touchNickname() },
+) {
+    OutlinedTextField(
+        value = value,          // value is String (never null in scope)
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        modifier = modifier.fillMaxWidth(),
+    )
+}
+```
+
+---
+
+#### Enum field
+
+Enum types are auto-detected — no annotation needed beyond `@Field`.
+
+```kotlin
+enum class ContactMethod { EMAIL, PHONE, SMS }
+
+@Field(label = "Preferred contact")
+val contactMethod: ContactMethod = ContactMethod.EMAIL,
+```
+
+```kotlin
+EnumField(
+    state = contactMethodState,
+    options = ContactMethod.entries,
+    onSelect = { controller.updateContactMethod(it) },
+) {
+    // selected: T  (the currently selected enum value)
+    // options: List<T>  (all possible values)
+    ExposedDropdownMenuBox(...) { /* your dropdown UI */ }
+}
+```
+
+---
+
+#### Async validation
+
+Async validators run in a coroutine after a debounce delay. Use them for server-side checks like username availability.
+
+```kotlin
+@Field(label = "Username")
+@AsyncValidation(UniqueUsernameValidator::class)
+val username: String = "",
+```
+
+```kotlin
+class UniqueUsernameValidator : AsyncFieldValidator<String> {
+    override suspend fun validate(value: String): ValidationResult {
+        delay(500) // debounce: runs 500ms after the user stops typing
+        return if (api.isUsernameAvailable(value)) {
+            ValidationResult.Valid
+        } else {
+            ValidationResult.Invalid(listOf("Username already taken"))
+        }
+    }
+}
+```
+
+While validating, `isValidating = true` is emitted on the field's state. Use it to show a loading indicator:
+
+```kotlin
+StringField(state = usernameState, ...) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        trailingIcon = if (isValidating) {
+            { CircularProgressIndicator(modifier = Modifier.size(20.dp)) }
+        } else null,
+        isError = showError,
+        supportingText = when {
+            isValidating -> { { Text("Checking availability…") } }
+            showError    -> { { Text(errorMessage ?: "") } }
+            else -> null
+        },
+        modifier = modifier.fillMaxWidth(),
+    )
+}
+```
+
+---
+
+#### Cross-field validation
+
+##### Password confirmation with `@MatchField`
+
+```kotlin
+@FormSchema
+data class SignUpForm(
+    @Field(label = "Password")
+    @MinLength(8)
+    val password: String = "",
+
+    @Field(label = "Confirm password")
+    @MatchField("password", message = "Passwords do not match")
+    val confirmPassword: String = "",
+)
+```
+
+No extra code needed in the UI — the generated controller validates `confirmPassword` against `password` automatically.
+
+##### Conditional required with `@RequiredIf`
+
+```kotlin
+@Field(label = "Email")
+@RequiredIf(targetField = "contactMethod", targetValue = "EMAIL")
+val email: String? = null,
+```
+
+`email` is required only when `contactMethod == "EMAIL"`. If the condition is false, the field is skipped during validation even if empty.
+
+##### Conditional visibility with `@VisibleWhen`
+
+```kotlin
+@Field(label = "Phone number")
+@VisibleWhen(field = "contactMethod", predicate = IsPhoneSelected::class)
+val phone: String? = null,
+```
+
+```kotlin
+class IsPhoneSelected : VisibilityPredicate {
+    override fun isVisible(value: Any?): Boolean = value == ContactMethod.PHONE
+}
+```
+
+The field's `FieldState.isVisible` updates reactively. Use `ConditionalField` in Compose to animate the show/hide:
+
+```kotlin
+ConditionalField(
+    state = phoneState,
+    onValueChange = { controller.updatePhone(it) },
+    onFocusLost = { controller.touchPhone() },
+) {
+    // rendered only when isVisible = true
+    OutlinedTextField(...)
+}
+```
+
+---
+
+### 7. Validation Annotations Reference
+
+#### String
+
+| Annotation | Parameters | Description |
+|---|---|---|
+| `@NotBlank` | `message` | Must not be empty or whitespace |
+| `@MinLength` | `min`, `message` | Minimum character count |
+| `@MaxLength` | `max`, `message` | Maximum character count |
+| `@Email` | `message` | Valid email address format |
+| `@Pattern` | `regex`, `message` | Custom regular expression |
+
+#### Number
+
+| Annotation | Parameters | Description |
+|---|---|---|
+| `@IntRange` | `min`, `max`, `message` | Integer must be within `[min, max]` |
+
+#### Boolean
+
+| Annotation | Parameters | Description |
+|---|---|---|
+| `@MustBeTrue` | `message` | Must be `true` (e.g. terms acceptance) |
+
+#### Cross-field
+
+| Annotation | Parameters | Description |
+|---|---|---|
+| `@MatchField` | `targetField`, `message` | Must equal the value of another field |
+| `@RequiredIf` | `targetField`, `targetValue`, `message` | Required when another field equals a value |
+| `@VisibleWhen` | `field`, `predicate` | Visibility controlled by a predicate class |
+
+#### Async
+
+| Annotation | Parameters | Description |
+|---|---|---|
+| `@AsyncValidation` | `validator: KClass` | Runs a suspending validator on value change |
+
+---
 
 ## Modules
 
 | Module | Description |
-|--------|-------------|
-| `formidable-core` | Annotations, state primitives, validator interfaces |
-| `formidable-ksp` | KSP processor that generates `*Controller` classes |
-| `formidable-compose` | Jetpack Compose integration with `Formidable {}` and field scopes |
+|---|---|
+| `formidable-core` | Annotations, `FieldState`, `ValidationResult`, validator interfaces |
+| `formidable-ksp` | KSP processor — generates `*Controller` classes at compile time |
+| `formidable-compose` | `Formidable {}`, `Field`, `ConditionalField`, `FieldScope` |
 
 ## Sample App
 
-See [`formidable-sample-android`](formidable-sample-android/) for a complete sign-up form example with:
-- Async username validation
-- Password confirmation with `@MatchField`
-- Conditional fields with `@VisibleWhen` and `@RequiredIf`
-- Enum dropdown for contact method selection
+See [`composeApp`](composeApp/) for a complete sign-up form with async validation, password confirmation, conditional fields, and an enum dropdown — running on Android, iOS, and in the browser.
 
 ## Contributing
 
@@ -241,4 +598,4 @@ Contributions are welcome! Please read the [contributing guidelines](CONTRIBUTIN
 
 ## License
 
-[MIT](LICENSE) - Copyright (c) 2024-present Wassim Beltaief
+[MIT](LICENSE) — Copyright © 2024-present Wassim Beltaief
