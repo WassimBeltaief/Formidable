@@ -1,5 +1,9 @@
 # Formidable
 
+<p align="center">
+  <img src="docs/assets/screenshot.png" alt="Formidable — Headless forms for Jetpack Compose" width="100%" />
+</p>
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![CI](https://github.com/WassimBeltaief/Formidable/actions/workflows/ci.yml/badge.svg)](https://github.com/WassimBeltaief/Formidable/actions/workflows/ci.yml)
 
@@ -89,6 +93,25 @@ You get validation, error display, focus management, and keyboard navigation for
 
 ## Installation
 
+### Android (Jetpack Compose)
+
+```kotlin
+// build.gradle.kts
+plugins {
+    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
+}
+
+dependencies {
+    implementation("com.wassimbeltaief.formidable:formidable-core:2.0.1")
+    implementation("com.wassimbeltaief.formidable:formidable-compose:2.0.1")
+    ksp("com.wassimbeltaief.formidable:formidable-ksp:2.0.1")
+}
+```
+
+### Kotlin Multiplatform (Compose Multiplatform)
+
+KSP in KMP runs against `commonMain` metadata, which requires a small amount of extra wiring to make the generated sources visible to all targets.
+
 ```kotlin
 // build.gradle.kts
 plugins {
@@ -109,13 +132,14 @@ dependencies {
     add("kspCommonMainMetadata", "com.wassimbeltaief.formidable:formidable-ksp:2.0.1")
 }
 
-// Make all compilation tasks depend on KSP metadata generation
+// Ensure KSP metadata runs before any compilation task
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
-    if (name != "kspCommonMainKotlinMetadata") {
+    if (!name.startsWith("ksp")) {
         dependsOn("kspCommonMainKotlinMetadata")
     }
 }
 
+// Make generated sources visible in commonMain
 kotlin.sourceSets.commonMain {
     kotlin.srcDir(layout.buildDirectory.dir("generated/ksp/metadata/commonMain/kotlin"))
 }
