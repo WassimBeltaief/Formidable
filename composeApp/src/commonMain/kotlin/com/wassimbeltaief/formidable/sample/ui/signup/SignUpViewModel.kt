@@ -11,7 +11,6 @@ class SignUpViewModel(
     getSignUpForm: GetSignUpFormUseCase,
     private val saveSignUpForm: SaveSignUpFormUseCase,
 ) : ViewModel() {
-
     val controller = SignUpFormController(getSignUpForm())
 
     private val _submitted = MutableStateFlow(false)

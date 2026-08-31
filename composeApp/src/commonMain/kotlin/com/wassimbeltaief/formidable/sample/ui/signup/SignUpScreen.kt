@@ -55,9 +55,10 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
 
     if (submitted) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 32.dp, vertical = 64.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 32.dp, vertical = 64.dp),
         ) {
             Text(
                 text = "Welcome,\n${viewModel.controller.data.firstName}.",
@@ -74,10 +75,11 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 32.dp, vertical = 64.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 32.dp, vertical = 64.dp),
     ) {
         Text(
             text = "Create account",
@@ -104,14 +106,24 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
                     label = { Text(label) },
                     placeholder = { Text(hint) },
                     isError = showError,
-                    supportingText = when {
-                        isValidating -> {{ Text("Checking availability...") }}
-                        showError -> {{ Text(errorMessage ?: "") }}
-                        else -> null
-                    },
-                    trailingIcon = if (isValidating) {{
-                        CircularProgressIndicator(modifier = Modifier.size(20.dp))
-                    }} else null,
+                    supportingText =
+                        when {
+                            isValidating -> {
+                                { Text("Checking availability...") }
+                            }
+                            showError -> {
+                                { Text(errorMessage ?: "") }
+                            }
+                            else -> null
+                        },
+                    trailingIcon =
+                        if (isValidating) {
+                            {
+                                CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                            }
+                        } else {
+                            null
+                        },
                     keyboardOptions = keyboardOptions,
                     keyboardActions = keyboardActions,
                     singleLine = true,
@@ -130,9 +142,12 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
                     label = { Text(label) },
                     placeholder = { Text(hint) },
                     isError = showError,
-                    supportingText = if (showError) {
-                        { Text(errorMessage ?: "") }
-                    } else null,
+                    supportingText =
+                        if (showError) {
+                            { Text(errorMessage ?: "") }
+                        } else {
+                            null
+                        },
                     keyboardOptions = keyboardOptions,
                     keyboardActions = keyboardActions,
                     singleLine = true,
@@ -151,9 +166,12 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
                     label = { Text(label) },
                     placeholder = { Text(hint) },
                     isError = showError,
-                    supportingText = if (showError) {
-                        { Text(errorMessage ?: "") }
-                    } else null,
+                    supportingText =
+                        if (showError) {
+                            { Text(errorMessage ?: "") }
+                        } else {
+                            null
+                        },
                     keyboardOptions = keyboardOptions,
                     keyboardActions = keyboardActions,
                     singleLine = true,
@@ -172,9 +190,12 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
                     label = { Text(label) },
                     placeholder = { Text(hint) },
                     isError = showError,
-                    supportingText = if (showError) {
-                        { Text(errorMessage ?: "") }
-                    } else null,
+                    supportingText =
+                        if (showError) {
+                            { Text(errorMessage ?: "") }
+                        } else {
+                            null
+                        },
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = keyboardOptions.copy(keyboardType = KeyboardType.Password),
                     keyboardActions = keyboardActions,
@@ -194,9 +215,12 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
                     label = { Text(label) },
                     placeholder = { Text(hint) },
                     isError = showError,
-                    supportingText = if (showError) {
-                        { Text(errorMessage ?: "") }
-                    } else null,
+                    supportingText =
+                        if (showError) {
+                            { Text(errorMessage ?: "") }
+                        } else {
+                            null
+                        },
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = keyboardOptions.copy(keyboardType = KeyboardType.Password),
                     keyboardActions = keyboardActions,
@@ -216,9 +240,12 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
                     label = { Text(if (isOptional) "$label (optional)" else label) },
                     placeholder = { Text(hint) },
                     isError = showError,
-                    supportingText = if (showError) {
-                        { Text(errorMessage ?: "") }
-                    } else null,
+                    supportingText =
+                        if (showError) {
+                            { Text(errorMessage ?: "") }
+                        } else {
+                            null
+                        },
                     keyboardOptions = keyboardOptions,
                     keyboardActions = keyboardActions,
                     singleLine = true,
@@ -237,9 +264,12 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
                     label = { Text(label) },
                     placeholder = { Text("e.g. 25") },
                     isError = showError,
-                    supportingText = if (showError) {
-                        { Text(errorMessage ?: "") }
-                    } else null,
+                    supportingText =
+                        if (showError) {
+                            { Text(errorMessage ?: "") }
+                        } else {
+                            null
+                        },
                     keyboardOptions = keyboardOptions,
                     keyboardActions = keyboardActions,
                     singleLine = true,
@@ -263,13 +293,19 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
                         label = { Text(label) },
                         trailingIcon = { Text("▼") },
                         isError = showError,
-                        supportingText = if (showError) {{ Text(errorMessage ?: "") }} else null,
+                        supportingText =
+                            if (showError) {
+                                { Text(errorMessage ?: "") }
+                            } else {
+                                null
+                            },
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Box(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .clickable { expanded = true },
+                        modifier =
+                            Modifier
+                                .matchParentSize()
+                                .clickable { expanded = true },
                     )
                     DropdownMenu(
                         expanded = expanded,
@@ -303,9 +339,12 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
                             label = { Text(label) },
                             placeholder = { Text(hint) },
                             isError = showError,
-                            supportingText = if (showError) {
-                                { Text(errorMessage ?: "") }
-                            } else null,
+                            supportingText =
+                                if (showError) {
+                                    { Text(errorMessage ?: "") }
+                                } else {
+                                    null
+                                },
                             keyboardOptions = keyboardOptions,
                             keyboardActions = keyboardActions,
                             singleLine = true,
@@ -329,9 +368,12 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
                             label = { Text(label) },
                             placeholder = { Text(hint) },
                             isError = showError,
-                            supportingText = if (showError) {
-                                { Text(errorMessage ?: "") }
-                            } else null,
+                            supportingText =
+                                if (showError) {
+                                    { Text(errorMessage ?: "") }
+                                } else {
+                                    null
+                                },
                             keyboardOptions = keyboardOptions,
                             keyboardActions = keyboardActions,
                             singleLine = true,

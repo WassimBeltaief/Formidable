@@ -9,15 +9,17 @@ import com.wassimbeltaief.formidable.sample.ui.signup.SignUpScreen
 import com.wassimbeltaief.formidable.sample.ui.signup.SignUpViewModel
 import com.wassimbeltaief.formidable.sample.ui.theme.FormidableTheme
 
-fun MainViewController() = ComposeUIViewController {
-    val repository = remember { SignUpRepositoryImpl() }
-    val viewModel = remember {
-        SignUpViewModel(
-            GetSignUpFormUseCase(repository),
-            SaveSignUpFormUseCase(repository),
-        )
+fun MainViewController() =
+    ComposeUIViewController {
+        val repository = remember { SignUpRepositoryImpl() }
+        val viewModel =
+            remember {
+                SignUpViewModel(
+                    GetSignUpFormUseCase(repository),
+                    SaveSignUpFormUseCase(repository),
+                )
+            }
+        FormidableTheme {
+            SignUpScreen(viewModel)
+        }
     }
-    FormidableTheme {
-        SignUpScreen(viewModel)
-    }
-}

@@ -9,7 +9,6 @@ import com.wassimbeltaief.formidable.sample.ui.signup.SignUpViewModel
 import com.wassimbeltaief.formidable.sample.ui.theme.FormidableTheme
 
 class MainActivity : ComponentActivity() {
-
     private val viewModel: SignUpViewModel by viewModels {
         (application as App).signUpViewModelFactory
     }

@@ -5,6 +5,10 @@ import com.wassimbeltaief.formidable.sample.domain.repository.SignUpRepository
 
 class SignUpRepositoryImpl : SignUpRepository {
     private var form = SignUpForm()
+
     override fun getForm(): SignUpForm = form
-    override fun saveForm(form: SignUpForm) { this.form = form }
+
+    override fun saveForm(form: SignUpForm) {
+        this.form = form
+    }
 }
