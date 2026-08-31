@@ -9,17 +9,22 @@
 [![codecov](https://codecov.io/gh/WassimBeltaief/Formidable/branch/master/graph/badge.svg)](https://codecov.io/gh/WassimBeltaief/Formidable)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.1.0-blueviolet.svg)](https://kotlinlang.org)
+[![Kotlin Multiplatform](https://img.shields.io/badge/Kotlin_Multiplatform-Android_·_iOS_·_Web-7F52FF)](https://www.jetbrains.com/kotlin-multiplatform/)
+[![Compose Multiplatform](https://img.shields.io/badge/Compose-Multiplatform-4285F4)](https://www.jetbrains.com/lp/compose-multiplatform/)
 
 Formidable generates type-safe form controllers from annotated Kotlin data classes. Define your form once — get state management, validation, and Compose integration on Android, iOS, and Web.
 
-## Highlights
-
-- **KSP-powered** — No runtime reflection, all code generated at compile time
-- **Type-safe** — Generated controllers with strongly-typed field access
-- **Headless** — You own the UI, Formidable handles the state
-- **Auto-rendering** — Optional M3 rendering with a config DSL, no boilerplate
-- **Validation** — Sync, async, and cross-field validation out of the box
-- **Multiplatform** — Android, iOS, and WASM via Compose Multiplatform
+| | Manual Compose | Formidable |
+|---|---|---|
+| **State management** | ❌ `remember` + `mutableStateOf` per field | ✅ Generated `StateFlow<FieldState<T>>` |
+| **Validation** | ❌ Write it yourself 😩 | ✅ `@Email` `@MinLength` `@NotBlank` `@Pattern`… 🎯 |
+| **Async validation** | ❌ Coroutines, debounce, state — all manual 😵 | ✅ `@AsyncValidation` ⚡ |
+| **Cross-field rules** | ❌ Wire fields together manually 🤯 | ✅ `@MatchField` `@RequiredIf` `@VisibleWhen` 🔗 |
+| **Focus & keyboard** | ❌ `FocusRequester`, `KeyboardOptions`, `ImeAction` 😤 | ✅ Auto-wired, `Tab` / `Done` handled 🎹 |
+| **Error display** | ❌ Manual `isError` + `supportingText` per field | ✅ Auto-rendered with config DSL overrides ✨ |
+| **Rendering** | ❌ All UI from scratch | ✅ Headless or auto-render M3 — your choice 🎨 |
+| **Code generation** | ➖ | ✅ KSP at compile time, zero reflection 🚀 |
+| **Multiplatform** | ➖ | ✅ Android · iOS · Web (Compose Multiplatform) 🌍 |
 
 ## Try it live
 
