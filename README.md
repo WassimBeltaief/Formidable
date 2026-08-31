@@ -4,8 +4,11 @@
   <img src="docs/assets/screenshot.png" alt="Formidable — Headless forms for Jetpack Compose" width="100%" />
 </p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Maven Central](https://img.shields.io/maven-central/v/com.wassimbeltaief.formidable/formidable-core.svg?label=Maven%20Central)](https://central.sonatype.com/search?q=com.wassimbeltaief.formidable)
 [![CI](https://github.com/WassimBeltaief/Formidable/actions/workflows/ci.yml/badge.svg)](https://github.com/WassimBeltaief/Formidable/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/WassimBeltaief/Formidable/branch/master/graph/badge.svg)](https://codecov.io/gh/WassimBeltaief/Formidable)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.1.0-blueviolet.svg)](https://kotlinlang.org)
 
 Formidable generates type-safe form controllers from annotated Kotlin data classes. Define your form once — get state management, validation, and Compose integration on Android, iOS, and Web.
 
