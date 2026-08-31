@@ -535,19 +535,31 @@ val email: String? = null,
 
 ##### Conditional visibility with `@VisibleWhen`
 
-```kotlin
-@Field(label = "Phone number")
-@VisibleWhen(field = "contactMethod", predicate = IsPhoneSelected::class)
-val phone: String? = null,
-```
+`@VisibleWhen` hides or shows a field based on the current value of another field. The field's `FieldState.isVisible` updates reactively — when it becomes `false`, the field is also excluded from validation entirely.
 
 ```kotlin
-class IsPhoneSelected : VisibilityPredicate {
-    override fun isVisible(value: Any?): Boolean = value == ContactMethod.PHONE
-}
+enum class ContactMethod { EMAIL, PHONE, SMS }
+
+@FormSchema
+data class ContactForm(
+    @Field(label = "Preferred contact")
+    val contactMethod: ContactMethod = ContactMethod.EMAIL,
+
+    @Field(label = "Phone number")
+    @VisibleWhen(targetField = "contactMethod", targetValue = "PHONE")
+    @RequiredIf(order = 1, targetField = "contactMethod", targetValue = "PHONE", message = "Phone is required")
+    @Pattern(order = 2, regex = "^\\+?[0-9]{10,14}$", message = "Please enter a valid phone number")
+    val phone: String? = null,
+)
 ```
 
-The field's `FieldState.isVisible` updates reactively. Use `ConditionalField` in Compose to animate the show/hide:
+Three annotations work together here:
+
+- **`@VisibleWhen`** — the field is shown only when `contactMethod == "PHONE"`. When hidden, it is skipped during validation regardless of its value.
+- **`@RequiredIf(order = 1, ...)`** — when visible, the field must not be empty. The `order` parameter controls which validator runs first within this field.
+- **`@Pattern(order = 2, ...)`** — once the presence check passes, the format is validated. Running it second means the user sees "Phone is required" before "invalid format" on an empty field.
+
+In the UI, use `ConditionalField` instead of `Field` — it renders nothing (and skips focus registration) when `isVisible = false`:
 
 ```kotlin
 ConditionalField(
@@ -555,8 +567,16 @@ ConditionalField(
     onValueChange = { controller.updatePhone(it) },
     onFocusLost = { controller.touchPhone() },
 ) {
-    // rendered only when isVisible = true
-    OutlinedTextField(...)
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        isError = showError,
+        supportingText = if (showError) { { Text(errorMessage ?: "") } } else null,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+        modifier = modifier.fillMaxWidth(),
+    )
 }
 ```
 
