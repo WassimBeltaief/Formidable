@@ -3,11 +3,9 @@ package com.wassimbeltaief.formidable.sample.ui.signup
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,25 +20,23 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.wassimbeltaief.formidable.compose.BooleanField
+import com.wassimbeltaief.formidable.compose.EnumField
 import com.wassimbeltaief.formidable.compose.Formidable
+import com.wassimbeltaief.formidable.compose.IntField
+import com.wassimbeltaief.formidable.compose.NullableStringField
+import com.wassimbeltaief.formidable.compose.StringField
 import com.wassimbeltaief.formidable.sample.domain.model.ContactMethod
 
 @Composable
@@ -101,328 +97,128 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
                         .fillMaxWidth()
                         .padding(horizontal = 32.dp, vertical = 64.dp),
             ) {
-        Text(
-            text = "Create account",
-            style = MaterialTheme.typography.displaySmall,
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = "Fill in the details below to get started.",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(40.dp))
+                Text(
+                    text = "Create account",
+                    style = MaterialTheme.typography.displaySmall,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = "Fill in the details below to get started.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(40.dp))
 
-        Formidable {
-            StringField(
-                state = usernameState,
-                onValueChange = { viewModel.controller.updateUsername(it) },
-                onFocusLost = { viewModel.controller.touchUsername() },
-            ) {
-                OutlinedTextField(
-                    value = value,
-                    onValueChange = onValueChange,
-                    modifier = modifier.fillMaxWidth(),
-                    label = { Text(label) },
-                    placeholder = { Text(hint) },
-                    isError = showError,
-                    supportingText =
-                        when {
-                            isValidating -> {
-                                { Text("Checking availability...") }
-                            }
-                            showError -> {
-                                { Text(errorMessage ?: "") }
-                            }
-                            else -> null
+                Formidable {
+                    // async validation: slot overrides via named `config` arg
+                    StringField(
+                        state = usernameState,
+                        onValueChange = { viewModel.controller.updateUsername(it) },
+                        onFocusLost = { viewModel.controller.touchUsername() },
+                        config = {
+                            supportingText =
+                                when {
+                                    usernameState.isValidating -> {
+                                        { Text("Checking availability…") }
+                                    }
+                                    usernameState.showError -> {
+                                        { Text(usernameState.errorMessage ?: "") }
+                                    }
+                                    else -> null
+                                }
+                            trailingIcon =
+                                if (usernameState.isValidating) {
+                                    { CircularProgressIndicator(Modifier.size(20.dp)) }
+                                } else {
+                                    null
+                                }
                         },
-                    trailingIcon =
-                        if (isValidating) {
-                            {
-                                CircularProgressIndicator(modifier = Modifier.size(20.dp))
-                            }
-                        } else {
-                            null
-                        },
-                    keyboardOptions = keyboardOptions,
-                    keyboardActions = keyboardActions,
-                    singleLine = true,
-                )
-            }
-            Spacer(Modifier.height(16.dp))
-            StringField(
-                state = firstNameState,
-                onValueChange = { viewModel.controller.updateFirstName(it) },
-                onFocusLost = { viewModel.controller.touchFirstName() },
-            ) {
-                OutlinedTextField(
-                    value = value,
-                    onValueChange = onValueChange,
-                    modifier = modifier.fillMaxWidth(),
-                    label = { Text(label) },
-                    placeholder = { Text(hint) },
-                    isError = showError,
-                    supportingText =
-                        if (showError) {
-                            { Text(errorMessage ?: "") }
-                        } else {
-                            null
-                        },
-                    keyboardOptions = keyboardOptions,
-                    keyboardActions = keyboardActions,
-                    singleLine = true,
-                )
-            }
-            Spacer(Modifier.height(16.dp))
-            StringField(
-                state = lastNameState,
-                onValueChange = { viewModel.controller.updateLastName(it) },
-                onFocusLost = { viewModel.controller.touchLastName() },
-            ) {
-                OutlinedTextField(
-                    value = value,
-                    onValueChange = onValueChange,
-                    modifier = modifier.fillMaxWidth(),
-                    label = { Text(label) },
-                    placeholder = { Text(hint) },
-                    isError = showError,
-                    supportingText =
-                        if (showError) {
-                            { Text(errorMessage ?: "") }
-                        } else {
-                            null
-                        },
-                    keyboardOptions = keyboardOptions,
-                    keyboardActions = keyboardActions,
-                    singleLine = true,
-                )
-            }
-            Spacer(Modifier.height(16.dp))
-            StringField(
-                state = passwordState,
-                onValueChange = { viewModel.controller.updatePassword(it) },
-                onFocusLost = { viewModel.controller.touchPassword() },
-            ) {
-                OutlinedTextField(
-                    value = value,
-                    onValueChange = onValueChange,
-                    modifier = modifier.fillMaxWidth(),
-                    label = { Text(label) },
-                    placeholder = { Text(hint) },
-                    isError = showError,
-                    supportingText =
-                        if (showError) {
-                            { Text(errorMessage ?: "") }
-                        } else {
-                            null
-                        },
-                    visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = keyboardOptions.copy(keyboardType = KeyboardType.Password),
-                    keyboardActions = keyboardActions,
-                    singleLine = true,
-                )
-            }
-            Spacer(Modifier.height(16.dp))
-            StringField(
-                state = confirmPasswordState,
-                onValueChange = { viewModel.controller.updateConfirmPassword(it) },
-                onFocusLost = { viewModel.controller.touchConfirmPassword() },
-            ) {
-                OutlinedTextField(
-                    value = value,
-                    onValueChange = onValueChange,
-                    modifier = modifier.fillMaxWidth(),
-                    label = { Text(label) },
-                    placeholder = { Text(hint) },
-                    isError = showError,
-                    supportingText =
-                        if (showError) {
-                            { Text(errorMessage ?: "") }
-                        } else {
-                            null
-                        },
-                    visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = keyboardOptions.copy(keyboardType = KeyboardType.Password),
-                    keyboardActions = keyboardActions,
-                    singleLine = true,
-                )
-            }
-            Spacer(Modifier.height(16.dp))
-            NullableStringField(
-                state = nicknameState,
-                onValueChange = { viewModel.controller.updateNickname(it) },
-                onFocusLost = { viewModel.controller.touchNickname() },
-            ) {
-                OutlinedTextField(
-                    value = value,
-                    onValueChange = onValueChange,
-                    modifier = modifier.fillMaxWidth(),
-                    label = { Text(if (isOptional) "$label (optional)" else label) },
-                    placeholder = { Text(hint) },
-                    isError = showError,
-                    supportingText =
-                        if (showError) {
-                            { Text(errorMessage ?: "") }
-                        } else {
-                            null
-                        },
-                    keyboardOptions = keyboardOptions,
-                    keyboardActions = keyboardActions,
-                    singleLine = true,
-                )
-            }
-            Spacer(Modifier.height(16.dp))
-            IntField(
-                state = ageState,
-                onValueChange = { viewModel.controller.updateAge(it) },
-                onFocusLost = { viewModel.controller.touchAge() },
-            ) {
-                OutlinedTextField(
-                    value = if (value == 0) "" else value.toString(),
-                    onValueChange = { onValueChange(it.filter { c -> c.isDigit() }.toIntOrNull() ?: 0) },
-                    modifier = modifier.fillMaxWidth(),
-                    label = { Text(label) },
-                    placeholder = { Text("e.g. 25") },
-                    isError = showError,
-                    supportingText =
-                        if (showError) {
-                            { Text(errorMessage ?: "") }
-                        } else {
-                            null
-                        },
-                    keyboardOptions = keyboardOptions,
-                    keyboardActions = keyboardActions,
-                    singleLine = true,
-                )
-            }
-            Spacer(Modifier.height(24.dp))
-            EnumField(
-                state = contactMethodState,
-                options = ContactMethod.entries,
-                onSelect = {
-                    viewModel.controller.updateContactMethod(it)
-                    viewModel.controller.touchContactMethod()
-                },
-            ) {
-                var expanded by remember { mutableStateOf(false) }
-                Box(modifier = modifier.fillMaxWidth()) {
-                    OutlinedTextField(
-                        value = selected.name.lowercase().replaceFirstChar { it.uppercase() },
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text(label) },
-                        trailingIcon = { Text("▼") },
-                        isError = showError,
-                        supportingText =
-                            if (showError) {
-                                { Text(errorMessage ?: "") }
-                            } else {
-                                null
-                            },
-                        modifier = Modifier.fillMaxWidth(),
                     )
-                    Box(
-                        modifier =
-                            Modifier
-                                .matchParentSize()
-                                .clickable { expanded = true },
+                    Spacer(Modifier.height(16.dp))
+                    StringField(
+                        state = firstNameState,
+                        onValueChange = { viewModel.controller.updateFirstName(it) },
+                        onFocusLost = { viewModel.controller.touchFirstName() },
                     )
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                    ) {
-                        options.forEach { option ->
-                            DropdownMenuItem(
-                                text = { Text(option.name.lowercase().replaceFirstChar { it.uppercase() }) },
-                                onClick = {
-                                    onSelect(option)
-                                    expanded = false
-                                },
+                    Spacer(Modifier.height(16.dp))
+                    StringField(
+                        state = lastNameState,
+                        onValueChange = { viewModel.controller.updateLastName(it) },
+                        onFocusLost = { viewModel.controller.touchLastName() },
+                    )
+                    Spacer(Modifier.height(16.dp))
+
+                    StringField(
+                        state = passwordState,
+                        onValueChange = { viewModel.controller.updatePassword(it) },
+                        onFocusLost = { viewModel.controller.touchPassword() },
+                        config = {
+                            visualTransformation = PasswordVisualTransformation()
+                            keyboardType = KeyboardType.Password
+                        },
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    StringField(
+                        state = confirmPasswordState,
+                        onValueChange = { viewModel.controller.updateConfirmPassword(it) },
+                        onFocusLost = { viewModel.controller.touchConfirmPassword() },
+                        config = {
+                            visualTransformation = PasswordVisualTransformation()
+                            keyboardType = KeyboardType.Password
+                        },
+                    )
+                    Spacer(Modifier.height(16.dp))
+
+                    NullableStringField(
+                        state = nicknameState,
+                        onValueChange = { viewModel.controller.updateNickname(it) },
+                        onFocusLost = { viewModel.controller.touchNickname() },
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    IntField(
+                        state = ageState,
+                        onValueChange = { viewModel.controller.updateAge(it) },
+                        onFocusLost = { viewModel.controller.touchAge() },
+                    )
+                    Spacer(Modifier.height(24.dp))
+                    EnumField(
+                        state = contactMethodState,
+                        options = ContactMethod.entries,
+                        onSelect = {
+                            viewModel.controller.updateContactMethod(it)
+                            viewModel.controller.touchContactMethod()
+                        },
+                    )
+
+                    AnimatedVisibility(visible = emailState.isVisible) {
+                        Column {
+                            Spacer(Modifier.height(16.dp))
+                            NullableStringField(
+                                state = emailState,
+                                onValueChange = { viewModel.controller.updateEmail(it) },
+                                onFocusLost = { viewModel.controller.touchEmail() },
                             )
                         }
                     }
-                }
-            }
 
-            AnimatedVisibility(visible = emailState.isVisible) {
-                Column {
+                    AnimatedVisibility(visible = phoneState.isVisible) {
+                        Column {
+                            Spacer(Modifier.height(16.dp))
+                            NullableStringField(
+                                state = phoneState,
+                                onValueChange = { viewModel.controller.updatePhone(it) },
+                                onFocusLost = { viewModel.controller.touchPhone() },
+                            )
+                        }
+                    }
+
                     Spacer(Modifier.height(16.dp))
-                    NullableStringField(
-                        state = emailState,
-                        onValueChange = { viewModel.controller.updateEmail(it) },
-                        onFocusLost = { viewModel.controller.touchEmail() },
-                    ) {
-                        OutlinedTextField(
-                            value = value,
-                            onValueChange = onValueChange,
-                            modifier = modifier.fillMaxWidth(),
-                            label = { Text(label) },
-                            placeholder = { Text(hint) },
-                            isError = showError,
-                            supportingText =
-                                if (showError) {
-                                    { Text(errorMessage ?: "") }
-                                } else {
-                                    null
-                                },
-                            keyboardOptions = keyboardOptions,
-                            keyboardActions = keyboardActions,
-                            singleLine = true,
-                        )
-                    }
+                    BooleanField(
+                        state = acceptTermsState,
+                        onCheckedChange = { viewModel.controller.updateAcceptTerms(it) },
+                        onFocusLost = { viewModel.controller.touchAcceptTerms() },
+                    )
                 }
-            }
-
-            AnimatedVisibility(visible = phoneState.isVisible) {
-                Column {
-                    Spacer(Modifier.height(16.dp))
-                    NullableStringField(
-                        state = phoneState,
-                        onValueChange = { viewModel.controller.updatePhone(it) },
-                        onFocusLost = { viewModel.controller.touchPhone() },
-                    ) {
-                        OutlinedTextField(
-                            value = value,
-                            onValueChange = onValueChange,
-                            modifier = modifier.fillMaxWidth(),
-                            label = { Text(label) },
-                            placeholder = { Text(hint) },
-                            isError = showError,
-                            supportingText =
-                                if (showError) {
-                                    { Text(errorMessage ?: "") }
-                                } else {
-                                    null
-                                },
-                            keyboardOptions = keyboardOptions,
-                            keyboardActions = keyboardActions,
-                            singleLine = true,
-                        )
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(16.dp))
-            BooleanField(
-                state = acceptTermsState,
-                onCheckedChange = { viewModel.controller.updateAcceptTerms(it) },
-                onFocusLost = { viewModel.controller.touchAcceptTerms() },
-            ) {
-                Column(modifier = modifier) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(checked = checked, onCheckedChange = onCheckedChange)
-                        Text(label, style = MaterialTheme.typography.bodyMedium)
-                    }
-                    if (showError) {
-                        Text(
-                            text = errorMessage ?: "",
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.labelMedium,
-                        )
-                    }
-                }
-            }
-        }
 
                 Spacer(Modifier.height(32.dp))
                 Button(

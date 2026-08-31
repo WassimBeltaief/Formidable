@@ -25,6 +25,7 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.ui)
             implementation(compose.foundation)
+            implementation(compose.material3)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
