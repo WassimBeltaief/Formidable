@@ -91,17 +91,15 @@ jobs:
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      - name: Download Ubuntu staging
+      - name: Merge staging artifacts
         uses: actions/download-artifact@v4
         with:
-          name: staging-ubuntu
+          merge-multiple: true
+          pattern: staging-*
           path: staging/
 
-      - name: Download macOS staging
-        uses: actions/download-artifact@v4
-        with:
-          name: staging-macos
-          path: staging/
+      - name: List staging contents
+        run: find staging/ -type f | sort
 
       - name: Bundle and upload to Maven Central
         env:
