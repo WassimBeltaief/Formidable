@@ -16,15 +16,15 @@ Formidable generates type-safe form controllers from annotated Kotlin data class
 
 | | Manual Compose | Formidable |
 |---|---|---|
-| **State management** | ❌ `remember` + `mutableStateOf` per field | ✅ Generated `StateFlow<FieldState<T>>` |
-| **Validation** | ❌ Write it yourself 😩 | ✅ `@Email` `@MinLength` `@NotBlank` `@Pattern`… 🎯 |
-| **Async validation** | ❌ Coroutines, debounce, state — all manual 😵 | ✅ `@AsyncValidation` ⚡ |
-| **Cross-field rules** | ❌ Wire fields together manually 🤯 | ✅ `@MatchField` `@RequiredIf` `@VisibleWhen` 🔗 |
-| **Focus & keyboard** | ❌ `FocusRequester`, `KeyboardOptions`, `ImeAction` 😤 | ✅ Auto-wired, `Tab` / `Done` handled 🎹 |
-| **Error display** | ❌ Manual `isError` + `supportingText` per field | ✅ Auto-rendered with config DSL overrides ✨ |
-| **Rendering** | ❌ All UI from scratch | ✅ Headless or auto-render M3 — your choice 🎨 |
-| **Code generation** | ➖ | ✅ KSP at compile time, zero reflection 🚀 |
-| **Multiplatform** | ➖ | ✅ Android · iOS · Web (Compose Multiplatform) 🌍 |
+| **State management** |`remember` + `mutableStateOf` per field ❌ |Generated `StateFlow<FieldState<T>>` ✅|
+| **Validation** |Write it yourself ❌ |`@Email` `@MinLength` `@NotBlank` `@Pattern`… ✅|
+| **Async validation** |Coroutines, debounce, state — all manual ❌ |`@AsyncValidation` ✅|
+| **Cross-field rules** |Wire fields together manually ❌ |`@MatchField` `@RequiredIf` `@VisibleWhen` ✅|
+| **Focus & keyboard** |`FocusRequester`, `KeyboardOptions`, `ImeAction` ❌ |Auto-wired, `Tab` / `Done` handled ✅|
+| **Error display** |Manual `isError` + `supportingText` per field ❌ |Auto-rendered with config DSL overrides ✅|
+| **Rendering** |All UI from scratch ❌ |Headless or auto-render M3 — your choice ✅|
+| **Code generation** | ➖ |KSP at compile time, zero reflection ✅|
+| **Multiplatform** | ➖ |Android · iOS · Web (Compose Multiplatform) ✅|
 
 ## Try it live
 
@@ -107,9 +107,9 @@ plugins {
 }
 
 dependencies {
-    implementation("io.github.wassimbeltaief:formidable-core:2.1.6")
-    implementation("io.github.wassimbeltaief:formidable-compose:2.1.6")
-    ksp("io.github.wassimbeltaief:formidable-ksp:2.1.6")
+    implementation("io.github.wassimbeltaief:formidable-core:2.1.7")
+    implementation("io.github.wassimbeltaief:formidable-compose:2.1.7")
+    ksp("io.github.wassimbeltaief:formidable-ksp:2.1.7")
 }
 ```
 
@@ -126,15 +126,15 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("io.github.wassimbeltaief:formidable-core:2.1.6")
-            implementation("io.github.wassimbeltaief:formidable-compose:2.1.6")
+            implementation("io.github.wassimbeltaief:formidable-core:2.1.7")
+            implementation("io.github.wassimbeltaief:formidable-compose:2.1.7")
         }
     }
 }
 
 dependencies {
     // KSP processes @FormSchema in commonMain, generates a Controller for all targets
-    add("kspCommonMainMetadata", "io.github.wassimbeltaief:formidable-ksp:2.1.6")
+    add("kspCommonMainMetadata", "io.github.wassimbeltaief:formidable-ksp:2.1.7")
 }
 
 // Ensure KSP metadata runs before any compilation task

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.7] — 2026-09-01
+
+### Fixed
+- Replaced deprecated `CanvasBasedWindow` with `ComposeViewport` for CMP 1.9.3 compatibility
+- Use `document.body?.let {}` instead of `!!` for null-safe viewport mounting
+
 ## [2.1.6] — 2026-09-01
 
 ### Added
