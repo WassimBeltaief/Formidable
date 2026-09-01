@@ -76,6 +76,12 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().con
     }
 }
 
+// ktlint scans the commonMain source set which includes KSP-generated sources;
+// declare the same dependency so task ordering is deterministic.
+tasks.matching { it.name.startsWith("runKtlint") }.configureEach {
+    dependsOn("kspCommonMainKotlinMetadata")
+}
+
 kotlin.sourceSets.commonMain {
     kotlin.srcDir(layout.buildDirectory.dir("generated/ksp/metadata/commonMain/kotlin"))
 }
