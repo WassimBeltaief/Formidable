@@ -9,9 +9,9 @@ permissions:
   contents: write
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
 
+  publish-android-ksp:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,28 +25,90 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Extract version from tag
-        id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-
-      - name: Publish to local staging
+      - name: Publish Android and KSP artifacts
         env:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
         run: |
           ./gradlew --no-configuration-cache \
-            :formidable-core:publishAllPublicationsToLocalStagingRepository \
-            :formidable-ksp:publishAllPublicationsToLocalStagingRepository \
-            :formidable-compose:publishAllPublicationsToLocalStagingRepository
+            :formidable-compose:publishAndroidReleasePublicationToLocalStagingRepository \
+            :formidable-ksp:publishMavenPublicationToLocalStagingRepository
+
+      - name: Upload staging
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-ubuntu
+          path: build/staging/
+
+  publish-ios-jvm:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Publish JVM, iOS, and metadata artifacts
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: |
+          ./gradlew --no-configuration-cache \
+            :formidable-core:publishKotlinMultiplatformPublicationToLocalStagingRepository \
+            :formidable-core:publishJvmPublicationToLocalStagingRepository \
+            :formidable-core:publishIosArm64PublicationToLocalStagingRepository \
+            :formidable-core:publishIosX64PublicationToLocalStagingRepository \
+            :formidable-core:publishIosSimulatorArm64PublicationToLocalStagingRepository \
+            :formidable-compose:publishKotlinMultiplatformPublicationToLocalStagingRepository \
+            :formidable-compose:publishIosArm64PublicationToLocalStagingRepository \
+            :formidable-compose:publishIosX64PublicationToLocalStagingRepository \
+            :formidable-compose:publishIosSimulatorArm64PublicationToLocalStagingRepository
+
+      - name: Upload staging
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-macos
+          path: build/staging/
+
+  bundle-and-release:
+    needs: [publish-android-ksp, publish-ios-jvm]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Download Ubuntu staging
+        uses: actions/download-artifact@v4
+        with:
+          name: staging-ubuntu
+          path: staging/
+
+      - name: Download macOS staging
+        uses: actions/download-artifact@v4
+        with:
+          name: staging-macos
+          path: staging/
 
       - name: Bundle and upload to Maven Central
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
         run: |
-          cd build/staging
-          zip -r ../../bundle.zip .
-          cd ../..
+          cd staging
+          zip -r ../bundle.zip .
+          cd ..
           curl --fail --request POST \
             --header "Authorization: Bearer $(printf '%s:%s' "$SONATYPE_USERNAME" "$SONATYPE_PASSWORD" | base64 -w0)" \
             --form "bundle=@bundle.zip" \
