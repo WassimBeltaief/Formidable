@@ -26,7 +26,7 @@ publishing {
 afterEvaluate {
     publishing {
         publications.withType<MavenPublication>().configureEach {
-            if (name != "kotlinMultiplatform" && name != "wasmJs") {
+            if (name != "kotlinMultiplatform") {
                 val pubName = name
                 val javadocJar = tasks.register("${pubName}JavadocJar", Jar::class) {
                     archiveClassifier.set("javadoc")
@@ -80,9 +80,5 @@ afterEvaluate {
 
     tasks.withType<Sign>().configureEach {
         onlyIf { !version.toString().endsWith("SNAPSHOT") }
-    }
-
-    tasks.withType<PublishToMavenRepository>().configureEach {
-        onlyIf { publication.name != "wasmJs" }
     }
 }

@@ -31,7 +31,9 @@ jobs:
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
         run: |
           ./gradlew --no-configuration-cache \
+            :formidable-core:publishWasmJsPublicationToLocalStagingRepository \
             :formidable-compose:publishAndroidReleasePublicationToLocalStagingRepository \
+            :formidable-compose:publishWasmJsPublicationToLocalStagingRepository \
             :formidable-ksp:publishMavenPublicationToLocalStagingRepository
 
       - name: Upload staging
