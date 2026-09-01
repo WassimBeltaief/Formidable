@@ -21,7 +21,7 @@ val javadocJar by tasks.registering(Jar::class) {
 afterEvaluate {
     publishing {
         publications.withType<MavenPublication>().configureEach {
-            if (name != "kotlinMultiplatform") {
+            if (name != "kotlinMultiplatform" && name != "wasmJs") {
                 artifact(javadocJar)
             }
             pom {
