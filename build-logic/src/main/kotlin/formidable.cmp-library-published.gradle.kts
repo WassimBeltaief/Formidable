@@ -20,10 +20,6 @@ kotlin {
     }
 }
 
-val javadocJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("javadoc")
-}
-
 publishing {
     repositories {
         maven {
@@ -37,6 +33,11 @@ afterEvaluate {
     publishing {
         publications.withType<MavenPublication>().configureEach {
             if (name != "kotlinMultiplatform" && name != "wasmJs") {
+                val pubName = name
+                val javadocJar = tasks.register("${pubName}JavadocJar", Jar::class) {
+                    archiveClassifier.set("javadoc")
+                    archiveAppendix.set(pubName)
+                }
                 artifact(javadocJar)
             }
             pom {
