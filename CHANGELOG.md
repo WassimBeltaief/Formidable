@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.6] — 2026-09-01
+
+### Added
+- End-to-end compile-testing suite for `FormidableProcessor` using `dev.zacsweers.kctfork:ksp:0.9.0`
+- 16 processor tests covering all field types (String, Boolean, Int, String?, Enum), all validators (@Email, @MinLength, @MaxLength, @NotBlank, @MustBeTrue, @MatchField, @RequiredIf), package placement, and the no-supported-fields error path
+
+### Changed
+- Kotlin 2.1.0 → 2.2.20, KSP 2.2.20-2.0.3, Compose Multiplatform 1.8.0 → 1.9.3, detekt 1.23.7 → 1.23.8, kotlinpoet 2.2.0 → 2.3.0
+
+## [2.1.5] — 2026-08-01
+
 ### Added
 - Initial release of Formidable form engine
 - `formidable-core` module with annotations and state primitives

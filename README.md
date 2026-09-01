@@ -107,9 +107,9 @@ plugins {
 }
 
 dependencies {
-    implementation("io.github.wassimbeltaief:formidable-core:2.1.5")
-    implementation("io.github.wassimbeltaief:formidable-compose:2.1.5")
-    ksp("io.github.wassimbeltaief:formidable-ksp:2.1.5")
+    implementation("io.github.wassimbeltaief:formidable-core:2.1.6")
+    implementation("io.github.wassimbeltaief:formidable-compose:2.1.6")
+    ksp("io.github.wassimbeltaief:formidable-ksp:2.1.6")
 }
 ```
 
@@ -126,15 +126,15 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("io.github.wassimbeltaief:formidable-core:2.1.5")
-            implementation("io.github.wassimbeltaief:formidable-compose:2.1.5")
+            implementation("io.github.wassimbeltaief:formidable-core:2.1.6")
+            implementation("io.github.wassimbeltaief:formidable-compose:2.1.6")
         }
     }
 }
 
 dependencies {
     // KSP processes @FormSchema in commonMain, generates a Controller for all targets
-    add("kspCommonMainMetadata", "io.github.wassimbeltaief:formidable-ksp:2.1.5")
+    add("kspCommonMainMetadata", "io.github.wassimbeltaief:formidable-ksp:2.1.6")
 }
 
 // Ensure KSP metadata runs before any compilation task
