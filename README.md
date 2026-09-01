@@ -107,9 +107,9 @@ plugins {
 }
 
 dependencies {
-    implementation("io.github.wassimbeltaief:formidable-core:2.0.1")
-    implementation("io.github.wassimbeltaief:formidable-compose:2.0.1")
-    ksp("io.github.wassimbeltaief:formidable-ksp:2.0.1")
+    implementation("io.github.wassimbeltaief:formidable-core:2.1.3")
+    implementation("io.github.wassimbeltaief:formidable-compose:2.1.3")
+    ksp("io.github.wassimbeltaief:formidable-ksp:2.1.3")
 }
 ```
 
@@ -126,15 +126,15 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("io.github.wassimbeltaief:formidable-core:2.0.1")
-            implementation("io.github.wassimbeltaief:formidable-compose:2.0.1")
+            implementation("io.github.wassimbeltaief:formidable-core:2.1.3")
+            implementation("io.github.wassimbeltaief:formidable-compose:2.1.3")
         }
     }
 }
 
 dependencies {
     // KSP processes @FormSchema in commonMain, generates a Controller for all targets
-    add("kspCommonMainMetadata", "io.github.wassimbeltaief:formidable-ksp:2.0.1")
+    add("kspCommonMainMetadata", "io.github.wassimbeltaief:formidable-ksp:2.1.3")
 }
 
 // Ensure KSP metadata runs before any compilation task
@@ -187,7 +187,6 @@ kotlin.sourceSets.commonMain {
 - **Server error DSL** — `controller.setErrors(mapOf("username" to "Already taken"))` batch API
 - **Accessibility** — screen reader semantics and content descriptions wired into auto-render
 - **Binary API compatibility** — Kotlin binary compatibility validator in CI
-- **Maven Central publishing** — `io.github.wassimbeltaief:*` on Maven Central
 
 ---
 
