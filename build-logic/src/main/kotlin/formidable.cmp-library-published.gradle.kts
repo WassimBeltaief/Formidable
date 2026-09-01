@@ -46,21 +46,6 @@ afterEvaluate {
             }
         }
 
-        repositories {
-            maven {
-                name = "sonatype"
-                val releasesUrl = uri("https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/")
-                val snapshotsUrl = uri("https://central.sonatype.com/repository/maven-snapshots/")
-                url = if (versionName.endsWith("SNAPSHOT")) snapshotsUrl else releasesUrl
-
-                credentials {
-                    username = providers.gradleProperty("SONATYPE_USERNAME").orNull
-                        ?: providers.environmentVariable("SONATYPE_USERNAME").orNull
-                    password = providers.gradleProperty("SONATYPE_PASSWORD").orNull
-                        ?: providers.environmentVariable("SONATYPE_PASSWORD").orNull
-                }
-            }
-        }
     }
 
     signing {

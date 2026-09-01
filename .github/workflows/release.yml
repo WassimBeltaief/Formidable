@@ -37,9 +37,8 @@ jobs:
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
         run: |
           ./gradlew --no-configuration-cache \
-                    :formidable-core:publishAllPublicationsToSonatypeRepository \
-                    :formidable-ksp:publishAllPublicationsToSonatypeRepository \
-                    :formidable-compose:publishAllPublicationsToSonatypeRepository
+                    publishToSonatype \
+                    closeAndReleaseSonatypeStagingRepository
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
