@@ -9,4 +9,5 @@ dependencies {
     implementation(libs.kotlinpoet.ksp)
 
     testImplementation(libs.bundles.junit5)
+    testImplementation(libs.kctfork.ksp)
 }
