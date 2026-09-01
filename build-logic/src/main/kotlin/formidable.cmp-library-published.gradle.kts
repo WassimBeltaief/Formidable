@@ -14,8 +14,23 @@ val versionName = providers.gradleProperty("VERSION_NAME").get()
 group = groupName
 version = versionName
 
+kotlin {
+    androidTarget {
+        publishLibraryVariants("release")
+    }
+}
+
 val javadocJar by tasks.registering(Jar::class) {
     archiveClassifier.set("javadoc")
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "LocalStaging"
+            url = uri(rootProject.layout.buildDirectory.dir("staging"))
+        }
+    }
 }
 
 afterEvaluate {
@@ -53,12 +68,6 @@ afterEvaluate {
             }
         }
 
-        repositories {
-            maven {
-                name = "LocalStaging"
-                url = uri(rootProject.layout.buildDirectory.dir("staging"))
-            }
-        }
     }
 
     signing {

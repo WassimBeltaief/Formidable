@@ -18,6 +18,15 @@ val javadocJar by tasks.registering(Jar::class) {
     archiveClassifier.set("javadoc")
 }
 
+publishing {
+    repositories {
+        maven {
+            name = "LocalStaging"
+            url = uri(rootProject.layout.buildDirectory.dir("staging"))
+        }
+    }
+}
+
 afterEvaluate {
     publishing {
         publications.withType<MavenPublication>().configureEach {
@@ -53,12 +62,6 @@ afterEvaluate {
             }
         }
 
-        repositories {
-            maven {
-                name = "LocalStaging"
-                url = uri(rootProject.layout.buildDirectory.dir("staging"))
-            }
-        }
     }
 
     signing {
