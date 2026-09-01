@@ -2,6 +2,20 @@ plugins {
     id("formidable.cmp-library-published")
 }
 
+kover {
+    reports {
+        filters {
+            excludes {
+                // Pure @Composable rendering functions — not testable via JVM unit tests
+                classes(
+                    "com.wassimbeltaief.formidable.compose.FormScopeExtensionsKt",
+                    "com.wassimbeltaief.formidable.compose.FormidableKt",
+                )
+            }
+        }
+    }
+}
+
 android {
     namespace = "com.wassimbeltaief.formidable.compose"
     defaultConfig {
