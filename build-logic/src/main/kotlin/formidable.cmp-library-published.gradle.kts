@@ -14,9 +14,16 @@ val versionName = providers.gradleProperty("VERSION_NAME").get()
 group = groupName
 version = versionName
 
+val javadocJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("javadoc")
+}
+
 afterEvaluate {
     publishing {
         publications.withType<MavenPublication>().configureEach {
+            if (name != "kotlinMultiplatform") {
+                artifact(javadocJar)
+            }
             pom {
                 name.set(project.name)
                 description.set("Headless, schema-driven form engine for Jetpack Compose")
@@ -69,5 +76,9 @@ afterEvaluate {
 
     tasks.withType<Sign>().configureEach {
         onlyIf { !version.toString().endsWith("SNAPSHOT") }
+    }
+
+    tasks.withType<PublishToMavenRepository>().configureEach {
+        onlyIf { publication.name != "wasmJs" }
     }
 }
