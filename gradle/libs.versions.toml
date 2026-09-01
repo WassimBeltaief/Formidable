@@ -1,12 +1,12 @@
 [versions]
-kotlin = "2.1.0"
+kotlin = "2.2.20"
 ktlint = "12.1.2"
-detekt = "1.23.7"
+detekt = "1.23.8"
 kover = "0.9.1"
 coroutines = "1.9.0"
 junit5 = "5.11.0"
-ksp = "2.1.0-1.0.29"
-kotlinpoet = "2.2.0"
+ksp = "2.2.20-2.0.3"
+kotlinpoet = "2.3.0"
 androidGradlePlugin = "8.7.3"
 lifecycle = "2.8.7"
 lifecycleKmp = "2.8.3"
@@ -14,7 +14,7 @@ activity = "1.9.3"
 compileSdk = "35"
 minSdk = "24"
 compose-bom = "2026.03.00"
-composeMultiplatform = "1.8.0"
+composeMultiplatform = "1.9.3"
 
 [libraries]
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }

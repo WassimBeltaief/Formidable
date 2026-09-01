@@ -12,6 +12,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SegmentedButton
@@ -367,7 +368,7 @@ public fun <T : Enum<T>> FormScope.EnumField(
                             } else {
                                 null
                             },
-                        modifier = Modifier.menuAnchor().fillMaxWidth(),
+                        modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
                     )
                     ExposedDropdownMenu(
                         expanded = expanded,

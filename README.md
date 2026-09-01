@@ -8,7 +8,7 @@
 [![CI](https://github.com/WassimBeltaief/Formidable/actions/workflows/ci.yml/badge.svg)](https://github.com/WassimBeltaief/Formidable/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/WassimBeltaief/Formidable/branch/master/graph/badge.svg)](https://codecov.io/gh/WassimBeltaief/Formidable)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Kotlin](https://img.shields.io/badge/kotlin-2.1.0-blueviolet.svg)](https://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.2.20-blueviolet.svg)](https://kotlinlang.org)
 [![Kotlin Multiplatform](https://img.shields.io/badge/Kotlin_Multiplatform-Android_·_iOS_·_Web-7F52FF)](https://www.jetbrains.com/kotlin-multiplatform/)
 [![Compose Multiplatform](https://img.shields.io/badge/Compose-Multiplatform-4285F4)](https://www.jetbrains.com/lp/compose-multiplatform/)
 
@@ -103,7 +103,7 @@ Formidable renders `OutlinedTextField` for you, auto-wires focus, keyboard navig
 ```kotlin
 // build.gradle.kts
 plugins {
-    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
+    id("com.google.devtools.ksp") version "2.2.20-2.0.3"
 }
 
 dependencies {
@@ -120,7 +120,7 @@ KSP in KMP runs against `commonMain` metadata, which requires a small amount of 
 ```kotlin
 // build.gradle.kts
 plugins {
-    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
+    id("com.google.devtools.ksp") version "2.2.20-2.0.3"
 }
 
 kotlin {
