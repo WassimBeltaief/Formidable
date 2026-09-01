@@ -14,15 +14,15 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class FormidableProcessorTest {
-
     private fun compile(vararg sources: SourceFile): JvmCompilationResult {
-        val compilation = KotlinCompilation().apply {
-            this.sources = sources.toList()
-            inheritClassPath = true
-            configureKsp(true) {
-                symbolProcessorProviders += FormidableProcessorProvider()
+        val compilation =
+            KotlinCompilation().apply {
+                this.sources = sources.toList()
+                inheritClassPath = true
+                configureKsp(true) {
+                    symbolProcessorProviders += FormidableProcessorProvider()
+                }
             }
-        }
         return compilation.compile()
     }
 
@@ -60,13 +60,20 @@ class FormidableProcessorTest {
 
     @Test
     fun `generates controller for String field`() {
-        val c = compile(formSource("LoginForm", body = """
-            @FormSchema
-            data class LoginForm(
-                @Field(label = "Email")
-                val email: String = "",
+        val c =
+            compile(
+                formSource(
+                    "LoginForm",
+                    body =
+                        """
+                        @FormSchema
+                        data class LoginForm(
+                            @Field(label = "Email")
+                            val email: String = "",
+                        )
+                        """.trimIndent(),
+                ),
             )
-        """.trimIndent()))
         assertEquals(KotlinCompilation.ExitCode.OK, c.exitCode, c.messages)
         val src = c.generatedSource("LoginFormController.kt")
         assertNotNull(src)
@@ -78,13 +85,20 @@ class FormidableProcessorTest {
 
     @Test
     fun `generated controller has reset, clear, validateAllSync, data, isValid`() {
-        val c = compile(formSource("ResetForm", body = """
-            @FormSchema
-            data class ResetForm(
-                @Field(label = "Name")
-                val name: String = "",
+        val c =
+            compile(
+                formSource(
+                    "ResetForm",
+                    body =
+                        """
+                        @FormSchema
+                        data class ResetForm(
+                            @Field(label = "Name")
+                            val name: String = "",
+                        )
+                        """.trimIndent(),
+                ),
             )
-        """.trimIndent()))
         assertEquals(KotlinCompilation.ExitCode.OK, c.exitCode, c.messages)
         val src = c.generatedSource("ResetFormController.kt")!!
         assertTrue(src.contains("fun reset"))
@@ -98,13 +112,20 @@ class FormidableProcessorTest {
 
     @Test
     fun `generates controller for Boolean field`() {
-        val c = compile(formSource("TermsForm", body = """
-            @FormSchema
-            data class TermsForm(
-                @Field(label = "Accept Terms")
-                val accepted: Boolean = false,
+        val c =
+            compile(
+                formSource(
+                    "TermsForm",
+                    body =
+                        """
+                        @FormSchema
+                        data class TermsForm(
+                            @Field(label = "Accept Terms")
+                            val accepted: Boolean = false,
+                        )
+                        """.trimIndent(),
+                ),
             )
-        """.trimIndent()))
         assertEquals(KotlinCompilation.ExitCode.OK, c.exitCode, c.messages)
         val src = c.generatedSource("TermsFormController.kt")
         assertNotNull(src)
@@ -118,13 +139,20 @@ class FormidableProcessorTest {
 
     @Test
     fun `generates controller for Int field`() {
-        val c = compile(formSource("AgeForm", body = """
-            @FormSchema
-            data class AgeForm(
-                @Field(label = "Age")
-                val age: Int = 0,
+        val c =
+            compile(
+                formSource(
+                    "AgeForm",
+                    body =
+                        """
+                        @FormSchema
+                        data class AgeForm(
+                            @Field(label = "Age")
+                            val age: Int = 0,
+                        )
+                        """.trimIndent(),
+                ),
             )
-        """.trimIndent()))
         assertEquals(KotlinCompilation.ExitCode.OK, c.exitCode, c.messages)
         val src = c.generatedSource("AgeFormController.kt")
         assertNotNull(src)
@@ -137,13 +165,20 @@ class FormidableProcessorTest {
 
     @Test
     fun `generates controller for nullable String field`() {
-        val c = compile(formSource("ProfileForm", body = """
-            @FormSchema
-            data class ProfileForm(
-                @Field(label = "Bio", optional = true)
-                val bio: String? = null,
+        val c =
+            compile(
+                formSource(
+                    "ProfileForm",
+                    body =
+                        """
+                        @FormSchema
+                        data class ProfileForm(
+                            @Field(label = "Bio", optional = true)
+                            val bio: String? = null,
+                        )
+                        """.trimIndent(),
+                ),
             )
-        """.trimIndent()))
         assertEquals(KotlinCompilation.ExitCode.OK, c.exitCode, c.messages)
         val src = c.generatedSource("ProfileFormController.kt")
         assertNotNull(src)
@@ -156,15 +191,22 @@ class FormidableProcessorTest {
 
     @Test
     fun `generates controller for enum field`() {
-        val c = compile(formSource("RoleForm", body = """
-            enum class Role { Admin, User, Guest }
+        val c =
+            compile(
+                formSource(
+                    "RoleForm",
+                    body =
+                        """
+                        enum class Role { Admin, User, Guest }
 
-            @FormSchema
-            data class RoleForm(
-                @Field(label = "Role")
-                val role: Role = Role.User,
+                        @FormSchema
+                        data class RoleForm(
+                            @Field(label = "Role")
+                            val role: Role = Role.User,
+                        )
+                        """.trimIndent(),
+                ),
             )
-        """.trimIndent()))
         assertEquals(KotlinCompilation.ExitCode.OK, c.exitCode, c.messages)
         val src = c.generatedSource("RoleFormController.kt")
         assertNotNull(src)
@@ -177,14 +219,21 @@ class FormidableProcessorTest {
 
     @Test
     fun `generates Email validator`() {
-        val c = compile(formSource("EmailForm", body = """
-            @FormSchema
-            data class EmailForm(
-                @Field(label = "Email")
-                @Email
-                val email: String = "",
+        val c =
+            compile(
+                formSource(
+                    "EmailForm",
+                    body =
+                        """
+                        @FormSchema
+                        data class EmailForm(
+                            @Field(label = "Email")
+                            @Email
+                            val email: String = "",
+                        )
+                        """.trimIndent(),
+                ),
             )
-        """.trimIndent()))
         assertEquals(KotlinCompilation.ExitCode.OK, c.exitCode, c.messages)
         val src = c.generatedSource("EmailFormController.kt")!!
         assertTrue(src.contains("email"))
@@ -193,14 +242,21 @@ class FormidableProcessorTest {
 
     @Test
     fun `generates MinLength validator`() {
-        val c = compile(formSource("PasswordForm", body = """
-            @FormSchema
-            data class PasswordForm(
-                @Field(label = "Password")
-                @MinLength(8)
-                val password: String = "",
+        val c =
+            compile(
+                formSource(
+                    "PasswordForm",
+                    body =
+                        """
+                        @FormSchema
+                        data class PasswordForm(
+                            @Field(label = "Password")
+                            @MinLength(8)
+                            val password: String = "",
+                        )
+                        """.trimIndent(),
+                ),
             )
-        """.trimIndent()))
         assertEquals(KotlinCompilation.ExitCode.OK, c.exitCode, c.messages)
         val src = c.generatedSource("PasswordFormController.kt")!!
         assertTrue(src.contains("password"))
@@ -209,14 +265,21 @@ class FormidableProcessorTest {
 
     @Test
     fun `generates MaxLength validator`() {
-        val c = compile(formSource("BioForm", body = """
-            @FormSchema
-            data class BioForm(
-                @Field(label = "Bio")
-                @MaxLength(200)
-                val bio: String = "",
+        val c =
+            compile(
+                formSource(
+                    "BioForm",
+                    body =
+                        """
+                        @FormSchema
+                        data class BioForm(
+                            @Field(label = "Bio")
+                            @MaxLength(200)
+                            val bio: String = "",
+                        )
+                        """.trimIndent(),
+                ),
             )
-        """.trimIndent()))
         assertEquals(KotlinCompilation.ExitCode.OK, c.exitCode, c.messages)
         val src = c.generatedSource("BioFormController.kt")!!
         assertTrue(src.contains("bio"))
@@ -225,14 +288,21 @@ class FormidableProcessorTest {
 
     @Test
     fun `generates NotBlank validator`() {
-        val c = compile(formSource("NameForm", body = """
-            @FormSchema
-            data class NameForm(
-                @Field(label = "Name")
-                @NotBlank
-                val name: String = "",
+        val c =
+            compile(
+                formSource(
+                    "NameForm",
+                    body =
+                        """
+                        @FormSchema
+                        data class NameForm(
+                            @Field(label = "Name")
+                            @NotBlank
+                            val name: String = "",
+                        )
+                        """.trimIndent(),
+                ),
             )
-        """.trimIndent()))
         assertEquals(KotlinCompilation.ExitCode.OK, c.exitCode, c.messages)
         val src = c.generatedSource("NameFormController.kt")!!
         assertTrue(src.contains("name"))
@@ -241,14 +311,21 @@ class FormidableProcessorTest {
 
     @Test
     fun `generates MustBeTrue validator for Boolean field`() {
-        val c = compile(formSource("ConsentForm", body = """
-            @FormSchema
-            data class ConsentForm(
-                @Field(label = "I agree to the terms")
-                @MustBeTrue
-                val agreed: Boolean = false,
+        val c =
+            compile(
+                formSource(
+                    "ConsentForm",
+                    body =
+                        """
+                        @FormSchema
+                        data class ConsentForm(
+                            @Field(label = "I agree to the terms")
+                            @MustBeTrue
+                            val agreed: Boolean = false,
+                        )
+                        """.trimIndent(),
+                ),
             )
-        """.trimIndent()))
         assertEquals(KotlinCompilation.ExitCode.OK, c.exitCode, c.messages)
         val src = c.generatedSource("ConsentFormController.kt")!!
         assertTrue(src.contains("agreed"))
@@ -257,17 +334,24 @@ class FormidableProcessorTest {
 
     @Test
     fun `generates MatchField validator for cross-field password confirmation`() {
-        val c = compile(formSource("SignUpForm", body = """
-            @FormSchema
-            data class SignUpForm(
-                @Field(label = "Password")
-                val password: String = "",
+        val c =
+            compile(
+                formSource(
+                    "SignUpForm",
+                    body =
+                        """
+                        @FormSchema
+                        data class SignUpForm(
+                            @Field(label = "Password")
+                            val password: String = "",
 
-                @Field(label = "Confirm Password")
-                @MatchField(targetField = "password")
-                val confirmPassword: String = "",
+                            @Field(label = "Confirm Password")
+                            @MatchField(targetField = "password")
+                            val confirmPassword: String = "",
+                        )
+                        """.trimIndent(),
+                ),
             )
-        """.trimIndent()))
         assertEquals(KotlinCompilation.ExitCode.OK, c.exitCode, c.messages)
         val src = c.generatedSource("SignUpFormController.kt")!!
         assertTrue(src.contains("confirmPassword"))
@@ -277,17 +361,24 @@ class FormidableProcessorTest {
 
     @Test
     fun `generates RequiredIf validator for conditional required field`() {
-        val c = compile(formSource("ContactForm", body = """
-            @FormSchema
-            data class ContactForm(
-                @Field(label = "Contact Method")
-                val method: String = "",
+        val c =
+            compile(
+                formSource(
+                    "ContactForm",
+                    body =
+                        """
+                        @FormSchema
+                        data class ContactForm(
+                            @Field(label = "Contact Method")
+                            val method: String = "",
 
-                @Field(label = "Phone Number")
-                @RequiredIf(targetField = "method", targetValue = "phone")
-                val phone: String = "",
+                            @Field(label = "Phone Number")
+                            @RequiredIf(targetField = "method", targetValue = "phone")
+                            val phone: String = "",
+                        )
+                        """.trimIndent(),
+                ),
             )
-        """.trimIndent()))
         assertEquals(KotlinCompilation.ExitCode.OK, c.exitCode, c.messages)
         val src = c.generatedSource("ContactFormController.kt")!!
         assertTrue(src.contains("phone"))
@@ -299,20 +390,27 @@ class FormidableProcessorTest {
 
     @Test
     fun `generates controller for multiple mixed-type fields`() {
-        val c = compile(formSource("FullForm", body = """
-            @FormSchema
-            data class FullForm(
-                @Field(label = "Name")
-                @NotBlank
-                val name: String = "",
+        val c =
+            compile(
+                formSource(
+                    "FullForm",
+                    body =
+                        """
+                        @FormSchema
+                        data class FullForm(
+                            @Field(label = "Name")
+                            @NotBlank
+                            val name: String = "",
 
-                @Field(label = "Age")
-                val age: Int = 0,
+                            @Field(label = "Age")
+                            val age: Int = 0,
 
-                @Field(label = "Active")
-                val active: Boolean = false,
+                            @Field(label = "Active")
+                            val active: Boolean = false,
+                        )
+                        """.trimIndent(),
+                ),
             )
-        """.trimIndent()))
         assertEquals(KotlinCompilation.ExitCode.OK, c.exitCode, c.messages)
         val src = c.generatedSource("FullFormController.kt")!!
         assertTrue(src.contains("val name"))
@@ -327,13 +425,21 @@ class FormidableProcessorTest {
 
     @Test
     fun `generated controller uses the source class package`() {
-        val c = compile(formSource("PkgForm", pkg = "com.test.myforms", body = """
-            @FormSchema
-            data class PkgForm(
-                @Field(label = "Username")
-                val username: String = "",
+        val c =
+            compile(
+                formSource(
+                    "PkgForm",
+                    pkg = "com.test.myforms",
+                    body =
+                        """
+                        @FormSchema
+                        data class PkgForm(
+                            @Field(label = "Username")
+                            val username: String = "",
+                        )
+                        """.trimIndent(),
+                ),
             )
-        """.trimIndent()))
         assertEquals(KotlinCompilation.ExitCode.OK, c.exitCode, c.messages)
         val src = c.generatedSource("PkgFormController.kt")!!
         assertTrue(src.contains("package com.test.myforms"))
@@ -343,12 +449,19 @@ class FormidableProcessorTest {
 
     @Test
     fun `reports error when @FormSchema class has no supported fields`() {
-        val c = compile(formSource("EmptyForm", body = """
-            @FormSchema
-            data class EmptyForm(
-                val unsupported: List<String> = emptyList(),
+        val c =
+            compile(
+                formSource(
+                    "EmptyForm",
+                    body =
+                        """
+                        @FormSchema
+                        data class EmptyForm(
+                            val unsupported: List<String> = emptyList(),
+                        )
+                        """.trimIndent(),
+                ),
             )
-        """.trimIndent()))
         // KSP calls logger.error() → fails compilation
         assertTrue(
             c.exitCode != KotlinCompilation.ExitCode.OK || c.messages.contains("no supported fields"),
