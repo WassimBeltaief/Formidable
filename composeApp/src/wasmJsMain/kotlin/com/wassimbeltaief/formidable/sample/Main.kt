@@ -13,17 +13,19 @@ import kotlinx.browser.document
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
-    ComposeViewport(document.body!!) {
-        val repository = remember { SignUpRepositoryImpl() }
-        val viewModel =
-            remember {
-                SignUpViewModel(
-                    GetSignUpFormUseCase(repository),
-                    SaveSignUpFormUseCase(repository),
-                )
+    document.body?.let { body ->
+        ComposeViewport(body) {
+            val repository = remember { SignUpRepositoryImpl() }
+            val viewModel =
+                remember {
+                    SignUpViewModel(
+                        GetSignUpFormUseCase(repository),
+                        SaveSignUpFormUseCase(repository),
+                    )
+                }
+            FormidableTheme {
+                SignUpScreen(viewModel)
             }
-        FormidableTheme {
-            SignUpScreen(viewModel)
         }
     }
 }
