@@ -31,7 +31,10 @@ jobs:
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
         run: |
           ./gradlew --no-configuration-cache \
+            :formidable-core:publishKotlinMultiplatformPublicationToLocalStagingRepository \
+            :formidable-core:publishJvmPublicationToLocalStagingRepository \
             :formidable-core:publishWasmJsPublicationToLocalStagingRepository \
+            :formidable-compose:publishKotlinMultiplatformPublicationToLocalStagingRepository \
             :formidable-compose:publishAndroidReleasePublicationToLocalStagingRepository \
             :formidable-compose:publishWasmJsPublicationToLocalStagingRepository \
             :formidable-ksp:publishMavenPublicationToLocalStagingRepository
@@ -63,12 +66,9 @@ jobs:
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
         run: |
           ./gradlew --no-configuration-cache \
-            :formidable-core:publishKotlinMultiplatformPublicationToLocalStagingRepository \
-            :formidable-core:publishJvmPublicationToLocalStagingRepository \
             :formidable-core:publishIosArm64PublicationToLocalStagingRepository \
             :formidable-core:publishIosX64PublicationToLocalStagingRepository \
             :formidable-core:publishIosSimulatorArm64PublicationToLocalStagingRepository \
-            :formidable-compose:publishKotlinMultiplatformPublicationToLocalStagingRepository \
             :formidable-compose:publishIosArm64PublicationToLocalStagingRepository \
             :formidable-compose:publishIosX64PublicationToLocalStagingRepository \
             :formidable-compose:publishIosSimulatorArm64PublicationToLocalStagingRepository
