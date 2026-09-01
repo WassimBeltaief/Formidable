@@ -15,6 +15,7 @@ val libs = the<org.gradle.api.artifacts.VersionCatalogsExtension>().named("libs"
 kotlin {
     jvmToolchain(17)
     androidTarget()
+    jvm()
     iosArm64()
     iosX64()
     iosSimulatorArm64()
