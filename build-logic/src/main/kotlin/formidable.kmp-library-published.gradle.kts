@@ -46,6 +46,12 @@ afterEvaluate {
             }
         }
 
+        repositories {
+            maven {
+                name = "LocalStaging"
+                url = uri(rootProject.layout.buildDirectory.dir("staging"))
+            }
+        }
     }
 
     signing {

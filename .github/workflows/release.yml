@@ -29,16 +29,28 @@ jobs:
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      - name: Build and publish
+      - name: Publish to local staging
         env:
-          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
         run: |
           ./gradlew --no-configuration-cache \
-                    publishToSonatype \
-                    closeAndReleaseSonatypeStagingRepository
+            :formidable-core:publishAllPublicationsToLocalStagingRepository \
+            :formidable-ksp:publishAllPublicationsToLocalStagingRepository \
+            :formidable-compose:publishAllPublicationsToLocalStagingRepository
+
+      - name: Bundle and upload to Maven Central
+        env:
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+        run: |
+          cd build/staging
+          zip -r ../../bundle.zip .
+          cd ../..
+          curl --fail --request POST \
+            --header "Authorization: Bearer $(printf '%s:%s' "$SONATYPE_USERNAME" "$SONATYPE_PASSWORD" | base64 -w0)" \
+            --form "bundle=@bundle.zip" \
+            "https://central.sonatype.com/api/v1/publisher/upload?name=formidable-${{ steps.version.outputs.VERSION }}&publishingType=AUTOMATIC"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

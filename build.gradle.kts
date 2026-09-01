@@ -9,16 +9,4 @@ plugins {
     alias(libs.plugins.ktlint) apply false
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.kover) apply false
-    alias(libs.plugins.nexus.publish)
-}
-
-nexusPublishing {
-    repositories {
-        sonatype {
-            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
-            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
-            username.set(providers.environmentVariable("SONATYPE_USERNAME").orElse(""))
-            password.set(providers.environmentVariable("SONATYPE_PASSWORD").orElse(""))
-        }
-    }
 }
