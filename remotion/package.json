@@ -1,0 +1,21 @@
+{
+  "name": "formidable-remotion",
+  "version": "1.0.0",
+  "description": "Remotion video for Formidable library",
+  "scripts": {
+    "start": "remotion studio",
+    "build": "remotion render FormidableIntro out/formidable-intro.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "ffmpeg": "^0.0.4",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^5.0.0"
+  }
+}

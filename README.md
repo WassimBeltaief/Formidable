@@ -14,6 +14,10 @@
 
 Formidable generates type-safe form controllers from annotated Kotlin data classes. Define your form once — get state management, validation, and Compose integration on Android, iOS, and Web.
 
+<p align="center">
+  <video src="formidable.mp4" autoplay loop muted playsinline width="100%"></video>
+</p>
+
 | | Manual Compose | Formidable |
 |---|---|---|
 | **State management** |`remember` + `mutableStateOf` per field ❌ |Generated `StateFlow<FieldState<T>>` ✅|
