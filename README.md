@@ -170,27 +170,20 @@ kotlin.sourceSets.commonMain {
 
 ## Roadmap
 
-### Planned modules
-
-| Module | Description |
+| Item | Description |
 |---|---|
+| Localization / i18n | Structured `ValidationError` sealed classes instead of hardcoded strings, enabling full control over error message localization via `stringResource()` or any i18n system |
 | `formidable-persistence` | SavedStateHandle + `retain {}` strategies for surviving process death |
 | `formidable-wizard` | Multi-step forms: `@Step`, `WizardState`, `FormWizard {}` |
 | `formidable-autofill` | Compose 1.8 autofill semantics injection via `@AutofillType` |
 | `formidable-showcase` | Live WASM playground on GitHub Pages |
-
-### Enhancements & ideas
-
-- **Password style** — `FieldStyle.Text.Password` that bundles `PasswordVisualTransformation` and an eye-icon toggle
-- **Date / time picker** — `DateField` and `TimeField` types with platform-native pickers
-- **Character counter** — auto-render shows remaining characters when `@MaxLength` is set
-- **Theming** — global default styles for auto-render fields (override `OutlinedTextField` defaults once, apply everywhere)
-- **`NullableEnumField` auto-render** — config DSL support for nullable enum fields (currently headless only)
-- **Compose Desktop target** — extend CMP support beyond Android + iOS + WASM
-- **Form serialization** — `controller.toJson()` / `controller.fromJson()` for draft saving
-- **Server error DSL** — `controller.setErrors(mapOf("username" to "Already taken"))` batch API
-- **Accessibility** — screen reader semantics and content descriptions wired into auto-render
-- **Binary API compatibility** — Kotlin binary compatibility validator in CI
+| Password style | `FieldStyle.Text.Password` that bundles `PasswordVisualTransformation` and an eye-icon toggle |
+| Date / time picker | `DateField` and `TimeField` types with platform-native pickers |
+| Character counter | Auto-render shows remaining characters when `@MaxLength` is set |
+| Theming | Global default styles for auto-render fields (override `OutlinedTextField` defaults once, apply everywhere) |
+| Compose Desktop target | Extend CMP support beyond Android + iOS + WASM |
+| Form serialization | `controller.toJson()` / `controller.fromJson()` for draft saving |
+| Server error DSL | `controller.setErrors(mapOf("username" to "Already taken"))` batch API |
 
 ---
 
