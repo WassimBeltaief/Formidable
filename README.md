@@ -18,22 +18,6 @@ Formidable generates type-safe form controllers from annotated Kotlin data class
   <img src="formidable.gif" alt="Formidable demo" width="100%" />
 </p>
 
-| | Manual Compose | Formidable |
-|---|---|---|
-| **State management** |`remember` + `mutableStateOf` per field ❌ |Generated `StateFlow<FieldState<T>>` ✅|
-| **Validation** |Write it yourself ❌ |`@Email` `@MinLength` `@NotBlank` `@Pattern`… ✅|
-| **Async validation** |Coroutines, debounce, state — all manual ❌ |`@AsyncValidation` ✅|
-| **Cross-field rules** |Wire fields together manually ❌ |`@MatchField` `@RequiredIf` `@VisibleWhen` ✅|
-| **Focus & keyboard** |`FocusRequester`, `KeyboardOptions`, `ImeAction` ❌ |Auto-wired, `Tab` / `Done` handled ✅|
-| **Error display** |Manual `isError` + `supportingText` per field ❌ |Auto-rendered with config DSL overrides ✅|
-| **Rendering** |All UI from scratch ❌ |Headless or auto-render M3 — your choice ✅|
-| **Code generation** | ➖ |KSP at compile time, zero reflection ✅|
-| **Multiplatform** | ➖ |Android · iOS · Web (Compose Multiplatform) ✅|
-
-## Try it live
-
-> **[wassimbeltaief.github.io/Formidable](https://wassimbeltaief.github.io/Formidable/)** — interactive demo running in the browser
-
 ---
 
 ## Quick Start
@@ -153,6 +137,11 @@ kotlin.sourceSets.commonMain {
     kotlin.srcDir(layout.buildDirectory.dir("generated/ksp/metadata/commonMain/kotlin"))
 }
 ```
+---
+
+## Try it live
+
+> **[wassimbeltaief.github.io/Formidable](https://wassimbeltaief.github.io/Formidable/)** — interactive demo running in the browser
 
 ---
 
